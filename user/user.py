@@ -2,9 +2,9 @@ import os
 import requests
 import telegram
 import telegram.bot
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import (Updater, CommandHandler,
-                          MessageHandler, Filters, CallbackQueryHandler)
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, LabeledPrice
+from telegram.ext import (Updater, CommandHandler, MessageHandler,
+                          Filters, PreCheckoutQueryHandler, CallbackQueryHandler)
 from telegram.ext.dispatcher import run_async
 
 import logging
@@ -54,7 +54,6 @@ def send(id, msg, keyboard):
 def start(update, context):
     id = update.message.chat_id
     deeplink = ''.join(context.args)
-    print(deeplink)
     if deeplink == 'delaundro':
         welcome(update, context)
     else:
@@ -131,6 +130,7 @@ def selectqueue(update, context):
     return
 
 
+@run_async
 def joinqueue(update, context):
     query = update.callback_query
     data = query.data
@@ -154,6 +154,7 @@ def joinqueue(update, context):
     return
 
 
+@run_async
 def cancelqueue(update, context):
     query = update.callback_query
     id = query.message.chat_id
@@ -163,14 +164,58 @@ def cancelqueue(update, context):
     return
 
 
+@run_async
+def dopayment(update, context):
+    washtype = "Standard Wash"  # for testing
+    price = 5  # for testing
+    id = update.message.chat_id  # for testing
+    title = "DE'Laundro Payment"
+    description = "Bill for {}:".format(washtype)
+    payload = "delaundro-pay"
+    provider_token = os.getenv('STRIPETOKEN')
+    start_parameter = "pay"
+    currency = "SGD"
+    prices = [LabeledPrice(washtype, price*100)]
+    context.bot.send_invoice(id, title, description, payload,
+                             provider_token, start_parameter, currency, prices)
+    send(id, '_Stripe Payments running in TEST mode._\n\nUse card number `4000 0070 2000 0003` with any future expiry date and CVV.', [])
+
+
+@run_async
+def precheckout(update, context):
+    query = update.pre_checkout_query
+    if query.invoice_payload != 'delaundro-pay':
+        query.answer(ok=False, error_message="Something went wrong...")
+    else:
+        query.answer(ok=True)
+
+
+@run_async
+def paymentsuccess(update, context):
+    update.message.reply_text("Thank you for your payment!")  # for testing
+
+
+@run_async
+def sendqr(update, context):
+    id = update.message.chat_id  # for testing
+    unlockcode = 12345  # for testing
+    context.bot.send_photo(chat_id=id, photo='https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={}&qzone=20'.format(
+        unlockcode), caption='Scan this QR code at the assigned washing machine to unlock the door or start wash')
+    return
+
+
 def main():
     updater = Updater(token=BOTTOKEN, use_context=True)
     dp = updater.dispatcher
 
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CallbackQueryHandler(callbackquery))
+    dp.add_handler(CommandHandler("testpay", dopayment))
+    dp.add_handler(PreCheckoutQueryHandler(precheckout))
+    dp.add_handler(MessageHandler(Filters.successful_payment, paymentsuccess))
+    dp.add_handler(CommandHandler("testqr", sendqr))
 
-    updater.start_polling()
+    # updater.start_polling()
     updater.start_webhook(listen='0.0.0.0',
                           port=PORT,
                           url_path=BOTTOKEN,
