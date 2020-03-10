@@ -7,6 +7,11 @@ from telegram.ext import (Updater, CommandHandler,
                           MessageHandler, Filters, CallbackQueryHandler)
 from telegram.ext.dispatcher import run_async
 
+import logging
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
 BOTTOKEN = os.getenv('BOTTOKEN')
 PORT = 8443
 
@@ -165,7 +170,7 @@ def main():
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CallbackQueryHandler(callbackquery))
 
-    # updater.start_polling()
+    updater.start_polling()
     updater.start_webhook(listen='0.0.0.0',
                           port=PORT,
                           url_path=BOTTOKEN,
