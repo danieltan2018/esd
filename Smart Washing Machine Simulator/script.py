@@ -7,20 +7,23 @@
 import json 
 import requests
 
-#Import timed function execution functionality 
-import threading 
-from random import randrange
-
 #Store locations into an array
 locations = ["novena","balestier","bukit panjang"]
 
 #Function to send message 
-def send(payload,URL):
+def create(payload,URL):
+    sendURL = "http://127.0.0.1:5000/status/" + str(URL)
+    print(payload)
+    print(sendURL)
+    r = requests.post(sendURL,json=payload)
+    # print(r.text)
+
+def update(payload,URL):
     sendURL = "http://127.0.0.1:5000/status/" + str(URL)
     print(payload)
     print(sendURL)
     r = requests.put(sendURL,json=payload)
-    # print(r.text)
+    print(r.text)
 
 # Choose which functionality you want to enable 
 user_command = input("What do you want me to do? ")
@@ -36,39 +39,41 @@ if user_command == "turn on all":
         for i in range(1,7):
             #generate JSON message
             payload = {
-                "errcode":"Initialisation",
-                "statuscode": "on",
-                "curuser": "Simulated",
-                "startcode":"Simulated",
-                "unlockcode":"Simulated",
-                "washtype":"cold wash"
-                }
+                "curuser": 1,
+                "errcodeid": 1,
+                "location": location,
+                "prevuser": 1,
+                "startcode": "none",
+                "statuscodeid": 0,
+                "unlockcode": "none"
+            }
             
             #Send JSON message 
-            URL = i + "&" + location
-            send(payload,URL)
+            URL = str(i) + "&" + location
+            create(payload,URL)
 
 #Functionality 2: Populate and turn off all washers 
 
 if user_command == "turn off all":
 
-    # Loop all identifiers to involve all machines 
+    # Loop all identifiers to involve all machines  
+
     for location in locations:
         for i in range(1,7):
             #generate JSON message
             payload = {
-                "errcode":"Initialisation",
-                "statuscode": "off",
-                "curuser": "Simulated",
-                "startcode":"Simulated",
-                "unlockcode":"Simulated",
-                "washtype":"off"
-                }
-        
-        # specify additional URL 
-        URL = i + "&" + location
-        #Send JSON message 
-        send(payload,URL)
+                "curuser": 1,
+                "errcodeid": 1,
+                "location": location,
+                "prevuser": 1,
+                "startcode": "none",
+                "statuscodeid": 1,
+                "unlockcode": "none"
+            }
+            
+            #Send JSON message 
+            URL = str(i) + "&" + location
+            create(payload,URL)
 
 #Functionality 3: Be able to set certain washers to turn on and off 
 #Command : modify
@@ -88,34 +93,28 @@ if user_command == "modify":
         print("We do not have a washing branch in that location. We only have it in novena, balestier or bukit panjang. Please try again")
         user_location = input("Please specify which location you want to make the change in (no caps)")
 
-    status = input("Please specify what modification you want to make (on,off or broken)? ")
+    statuscodeid = input("Please specify what modification you want to make (0 - available 1- unavailable 2- Error)? ")
 
     #Error validation
-    states = ["on","off","broken"]
-    while status not in states:
+    states = ["0","1","2"]
+    while statuscodeid not in states:
         print("This is not a correct modification. Please try again")
-        status = input("Please specify what modification you want to make (on,off or broken)?")
+        statuscodeid = input("Please specify what modification you want to make (0 - available 1- unavailable 2- Error)? ")
     
+
     payload = {
-        "errcode":"Initialisation",
-        "statuscode": status,
-        "curuser": "Simulated",
-        "startcode":"Simulated",
-        "unlockcode":"Simulated",
-        "washtype":"off"
+        "curuser": 1,
+        "errcodeid": 1,
+        "location": user_location,
+        "machine_id":int(machine_id),
+        "prevuser": 1,
+        "startcode": "none",
+        "statuscodeid": int(statuscodeid),
+        "unlockcode": "none"
         }
+
         
     URL = str(machine_id) + "&" + user_location
     
-    send(payload,URL)
+    update(payload,URL)
     
-#Functionality 4: Simulate multiple users and breakdowns 
-#Command: simulate 
-#Parameters : 
-# - breakdowns only happen once every 2 minutes or less to any machine 
-# - new request to use machine occurs once every 20 seconds or less 
-
-if user_command == "simulate":
-    simulate_user()
-    simulate_error()
-
