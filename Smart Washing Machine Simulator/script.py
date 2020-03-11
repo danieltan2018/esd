@@ -12,89 +12,81 @@ import threading
 from random import randrange
 
 #Store locations into an array
-locations = ["Novena","Balestier","Bukit Panjang"]
-
-#Store the number of washers for looping. Each number represents one ID 
-number_of_washers = 18 
-
-user_command = input("What do you want me to do? ")
+locations = ["novena","balestier","bukit panjang"]
 
 #Function to send message 
-def send(payload):
-        r = requests.put('https://reqres.in/api/users?page=2',json=payload)
-        print(r.text)
+def send(payload,URL):
+    sendURL = "http://127.0.0.1:5000/status/" + str(URL)
+    print(payload)
+    print(sendURL)
+    r = requests.put(sendURL,json=payload)
+    # print(r.text)
 
-#Function to simulate user 
-def simulate_user():
-    time = randrange(1,21)
-    threading.Timer(time,simulate_user).start()
-    random_machine_ID = randrange(1,19)
-    payload = {
-        "MachineID":random_machine_ID,
-        "errcode":"none",
-        "statuscode": "on"
-    }
-    send(payload)
+# Choose which functionality you want to enable 
+user_command = input("What do you want me to do? ")
 
-#Function to simulate random errors 
-
-def simulate_error():
-    time = randrange(1,121)
-    threading.Timer(time,simulate_user).start()
-    random_machine_ID = randrange(1,19)
-    payload = {
-        "MachineID":random_machine_ID,
-        "errcode":"simulated",
-        "statuscode": "broken"
-    }
-    send(payload)
-
-#Functionality 1: Be able to set all washers to work 
+#Functionality 1: Be able to populate washers and set all washers to on
 #The command is "turn on all"
 
 if user_command == "turn on all":
-    #Loop all locations to turn on all machines 
-    for i in range(1,number_of_washers+1):
-        
-        #generate JSON message
-        payload = {
-            "MachineID":i,
-            "errcode":"none",
-            "statuscode": "on"
-            }
-        
-        #Send JSON message 
-        
-        send(payload)
 
-#Functionality 2: Be able to turn off all washers 
+    # Loop all identifiers to involve all machines  
+
+    for location in locations:
+        for i in range(1,7):
+            #generate JSON message
+            payload = {
+                "errcode":"Initialisation",
+                "statuscode": "on",
+                "curuser": "Simulated",
+                "startcode":"Simulated",
+                "unlockcode":"Simulated",
+                "washtype":"cold wash"
+                }
+            
+            #Send JSON message 
+            URL = i + "&" + location
+            send(payload,URL)
+
+#Functionality 2: Populate and turn off all washers 
 
 if user_command == "turn off all":
-    #Loop all locations to turn on all machines 
-    for i in range(1,number_of_washers+1):
-        
-        #generate JSON message
-        payload = {
-            "MachineID":i,
-            "errcode":"none",
-            "statuscode": "off"
-            }
-        
-        #Send JSON message 
-        
-        send(payload)
 
-#Functionality 2: Be able to set certain washers to turn on and off 
+    # Loop all identifiers to involve all machines 
+    for location in locations:
+        for i in range(1,7):
+            #generate JSON message
+            payload = {
+                "errcode":"Initialisation",
+                "statuscode": "off",
+                "curuser": "Simulated",
+                "startcode":"Simulated",
+                "unlockcode":"Simulated",
+                "washtype":"off"
+                }
+        
+        # specify additional URL 
+        URL = i + "&" + location
+        #Send JSON message 
+        send(payload,URL)
+
+#Functionality 3: Be able to set certain washers to turn on and off 
 #Command : modify
 
 if user_command == "modify":
     machine_id = int(input("Please specify the machine ID "))
-    #Error validation
-
-    while machine_id > 18 or machine_id<0:
-        print("This is not a correct machine ID. Please try again")
+    
+    #Error validation: ID cannot be more than 6 
+    while machine_id> 6 and machine_id<0:
+        print("This is not a correct machine ID. We only have machine IDs to 6 in each location. Please try again")
         machine_id = int(input("Please specify the machine ID "))
 
+    user_location = input("Please specify which location you want to make the change in (no caps)")
+    #Error validation. Make sure that the location is specified to one of our branches 
+
+    while user_location not in locations:
+        print("We do not have a washing branch in that location. We only have it in novena, balestier or bukit panjang. Please try again")
+        user_location = input("Please specify which location you want to make the change in (no caps)")
 
     status = input("Please specify what modification you want to make (on,off or broken)? ")
 
@@ -105,12 +97,17 @@ if user_command == "modify":
         status = input("Please specify what modification you want to make (on,off or broken)?")
     
     payload = {
-            "MachineID":i,
-            "errcode":"simulated",
-            "statuscode": "broken"
-    }
+        "errcode":"Initialisation",
+        "statuscode": status,
+        "curuser": "Simulated",
+        "startcode":"Simulated",
+        "unlockcode":"Simulated",
+        "washtype":"off"
+        }
+        
+    URL = machine_id + "&" + user_location
     
-    send(payload)
+    send(payload,URL)
     
 #Functionality 4: Simulate multiple users and breakdowns 
 #Command: simulate 
