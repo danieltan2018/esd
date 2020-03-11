@@ -6,6 +6,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, LabeledPrice
 from telegram.ext import (Updater, CommandHandler, MessageHandler,
                           Filters, PreCheckoutQueryHandler, CallbackQueryHandler)
 from telegram.ext.dispatcher import run_async
+import pika
+import json
 
 import logging
 logging.basicConfig(
@@ -39,6 +41,33 @@ except IOError:
     with open("private.key", "wt") as keyfile:
         keyfile.write(crypto.dump_privatekey(
             crypto.FILETYPE_PEM, key).decode('ascii'))
+
+
+@run_async
+def startAMQP():
+    hostname = "rabbit.delaundro.me"
+    port = 5672
+    connection = pika.BlockingConnection(
+        pika.ConnectionParameters(host=hostname, port=port))
+    channel = connection.channel()
+    exchangename = "laundro_topic"
+    channel.exchange_declare(exchange=exchangename, exchange_type='topic')
+    channelqueue = channel.queue_declare(queue="status", durable=True)
+    queue_name = channelqueue.method.queue
+    channel.queue_bind(exchange=exchangename,
+                       queue=queue_name, routing_key='*.status')
+    channel.basic_consume(
+        queue=queue_name, on_message_callback=amqpcallback, auto_ack=True)
+    channel.start_consuming()
+
+
+def amqpcallback(channel, method, properties, body):
+    processStatus(json.loads(body))
+
+
+@run_async
+def processStatus(status):
+    pass
 
 
 @run_async
@@ -216,6 +245,7 @@ def main():
     dp.add_handler(CommandHandler("testqr", sendqr))
 
     # updater.start_polling()
+    startAMQP()
     updater.start_webhook(listen='0.0.0.0',
                           port=PORT,
                           url_path=BOTTOKEN,
