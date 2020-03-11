@@ -16,12 +16,12 @@ CORS(app)
 class Status(db.Model):
     __tablename__ = 'status'
  
-    machineid = db.Column(db.String(100), primary_key=True)
-    statuscodeid = db.Column(db.String(100), nullable=False)
+    machineid = db.Column(db.Integer, primary_key=True)
+    statuscodeid = db.Column(db.Integer, nullable=False)
     location = db.Column(db.String(100), nullable=True)
-    curuser = db.Column(db.String(100), nullable=False)
-    prevuser = db.Column(db.String(100), nullable=False)
-    errcodeid = db.Column(db.String(100), nullable=False)
+    curuser = db.Column(db.Integer, nullable=False)
+    prevuser = db.Column(db.Integer, nullable=False)
+    errcodeid = db.Column(db.Integer, nullable=False)
     unlockcode = db.Column(db.String(1000), nullable=False)
     startcode = db.Column(db.String(1000), nullable=False)
     
@@ -37,22 +37,22 @@ class Status(db.Model):
         self.startcode = startcode
  
     def json(self):
-        return {"machineid": self.machineid, "statuscodeid": self.statuscodeidid, "location": self.location, "curuser": self.curuser, "prevuser": self.prevuser, "errcodeid": self.errcodeid, "unlockcode": self.unlockcode, "startcode": self.startcode}
+        return {"machineid": self.machineid, "statuscodeid": self.statuscodeid, "location": self.location, "curuser": self.curuser, "prevuser": self.prevuser, "errcodeid": self.errcodeid, "unlockcode": self.unlockcode, "startcode": self.startcode}
     
     
 @app.route("/status")
 def get_available():
     return jsonify({"status": [status.json() for status in Status.query.all()]})
 
-@app.route("/status/<string:location>&<string:statuscodeidid>")
-def find_by_location(location, statuscodeidid):
-    status= Status.query.filter_by(location=location, statuscodeidid=statuscodeidid).all()
+@app.route("/status/<string:location>&<int:statuscodeid>")
+def find_by_location(location, statuscodeid):
+    status= Status.query.filter_by(location=location, statuscodeid=statuscodeid).all()
     if status:
-        return jsonify({"machineid":[status.json()for status in Status.query.filter_by(location=location,statuscodeidid=statuscodeidid).all()]})
+        return jsonify({"machineid":[status.json()for status in Status.query.filter_by(location=location,statuscodeid=statuscodeid).all()]})
     return jsonify({"message": "Location not found."}), 404
 
 
-@app.route("/status/<string:machineid>")
+@app.route("/status/<int:machineid>")
 def find_by_machineid(machineid):
     status= Status.query.filter_by(machineid=machineid).all()
     if status:
@@ -60,12 +60,14 @@ def find_by_machineid(machineid):
     return jsonify({"message": "Machine not found."}), 404
 
 
-@app.route("/status/<string:machineid>&<string:location>", methods=['PUT'])
+
+@app.route("/status/<int:machineid>&<string:location>", methods=['PUT'])
 def update_machine(machineid,location):
-    status = Status.query.get(machineid,location)
+    status = Status.query.filter_by(machineid=machineid,location=location).first()
     errcodeid = request.json["errcodeid"]
-    statuscodeidid = request.json["statuscodeid"]
+    statuscodeid = request.json["statuscodeid"]
     curuser = request.json["curuser"]
+    prevuser = request.json["prevuser"]
     startcode = request.json["startcode"]
     unlockcode = request.json["unlockcode"]
     
@@ -75,23 +77,6 @@ def update_machine(machineid,location):
     status.startcode = startcode
     status.unlockcode = unlockcode
     
-    try:
-        db.session.commit()
-    except:
-        return jsonify({"message": "Error Updating Data"}), 500
-    
-    return jsonify(status.json()), 201
-
-
-@app.route("/status/<string:machineid>&<string:statuscodeid>", methods=['PUT'])
-def update_machine_error(machineid,statuscodeid):
-    status = Status.query.get(machineid)
-    errcodeid = request.json["errcodeid"]
-    statuscodeid = request.json["statuscodeid"]
- 
-    status.errcodeid = errcodeid
-    status.statuscodeid = statuscodeid
-  
     
     try:
         db.session.commit()
@@ -99,6 +84,23 @@ def update_machine_error(machineid,statuscodeid):
         return jsonify({"message": "Error Updating Data"}), 500
     
     return jsonify(status.json()), 201
+
+@app.route("/status/<int:machineid>&<string:location>", methods=['POST'])
+def create_machine(machineid,location):
+    if (Status.query.filter_by(machineid = machineid, location = location).first()):
+        return jsonify({"message": "Machine Already Exist"}), 400
+    data = request.get_json()
+    status = Status(machineid,**data)
+    print(status)
+    try:
+        db.session.add(status)
+        db.session.commit()
+    except:
+        return jsonify({"message": "Error Updating Data"}), 500
+    
+    return jsonify(status.json()), 201
+
+
 
     
 if __name__ == '__main__':
