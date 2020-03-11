@@ -20,7 +20,7 @@ class Status(db.Model):
 
     machineid = db.Column(db.Integer, primary_key=True)
     statuscodeid = db.Column(db.Integer, nullable=False)
-    location = db.Column(db.String(100), nullable=True)
+    location = db.Column(db.String(100), primary_key=True)
     curuser = db.Column(db.Integer, nullable=False)
     prevuser = db.Column(db.Integer, nullable=False)
     errcodeid = db.Column(db.Integer, nullable=False)
@@ -72,8 +72,8 @@ def find_by_machineid(machineid):
 
 @app.route("/status/<int:machineid>&<string:location>", methods=['PUT'])
 def update_machine(machineid, location):
-    status = Status.query.filter_by(
-        machineid=machineid, location=location).first()
+    status = Status.query.filter_by(machineid=machineid,location=location).first()
+    print(status)
     errcodeid = request.json["errcodeid"]
     statuscodeid = request.json["statuscodeid"]
     curuser = request.json["curuser"]
@@ -84,6 +84,7 @@ def update_machine(machineid, location):
     status.errcodeid = errcodeid
     status.statuscodeid = statuscodeid
     status.curuser = curuser
+    status.prevuser = prevuser
     status.startcode = startcode
     status.unlockcode = unlockcode
 
