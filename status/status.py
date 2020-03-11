@@ -74,6 +74,7 @@ def update_machine(machineid,location):
     status.errcodeid = errcodeid
     status.statuscodeid = statuscodeid
     status.curuser = curuser
+    status.prevuser = prevuser
     status.startcode = startcode
     status.unlockcode = unlockcode
     
