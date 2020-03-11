@@ -105,7 +105,7 @@ if user_command == "modify":
         "washtype":"off"
         }
         
-    URL = machine_id + "&" + user_location
+    URL = str(machine_id) + "&" + user_location
     
     send(payload,URL)
     
