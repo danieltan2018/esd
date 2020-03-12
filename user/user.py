@@ -42,16 +42,17 @@ except IOError:
         keyfile.write(crypto.dump_privatekey(
             crypto.FILETYPE_PEM, key).decode('ascii'))
 
+hostname = "rabbit.delaundro.me"
+port = 5672
+connection = pika.BlockingConnection(
+    pika.ConnectionParameters(host=hostname, port=port))
+channel = connection.channel()
+exchangename = "laundro_topic"
+channel.exchange_declare(exchange=exchangename, exchange_type='topic')
+
 
 @run_async
-def startAMQP():
-    hostname = "rabbit.delaundro.me"
-    port = 5672
-    connection = pika.BlockingConnection(
-        pika.ConnectionParameters(host=hostname, port=port))
-    channel = connection.channel()
-    exchangename = "laundro_topic"
-    channel.exchange_declare(exchange=exchangename, exchange_type='topic')
+def startamqp():
     channelqueue = channel.queue_declare(queue="status", durable=True)
     queue_name = channelqueue.method.queue
     channel.queue_bind(exchange=exchangename,
@@ -63,6 +64,14 @@ def startAMQP():
 
 def amqpcallback(channel, method, properties, body):
     processStatus(json.loads(body))
+
+
+def paymentamqp(resultmessage):
+    channel.queue_declare(queue='monitoring', durable=True)
+    channel.queue_bind(exchange=exchangename,
+                       queue='monitoring', routing_key='#')
+    channel.basic_publish(exchange=exchangename, routing_key="payment.info",
+                          body=resultmessage, properties=pika.BasicProperties(delivery_mode=2))
 
 
 @run_async
@@ -245,7 +254,7 @@ def main():
     dp.add_handler(CommandHandler("testqr", sendqr))
 
     # updater.start_polling()
-    startAMQP()
+    startamqp()
     updater.start_webhook(listen='0.0.0.0',
                           port=PORT,
                           url_path=BOTTOKEN,
