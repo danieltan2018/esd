@@ -1,0 +1,68 @@
+<html lang="en">
+    <head>
+        <title>Vendor Dashboard</title>
+        <!-- Bootstrap 4 -->
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+        <!-- API KEY -->
+        <meta name="google-signin-client_id" content="369460233382-4oa59s8nmq9cu2cu0q5kb6cka5og1rng.apps.googleusercontent.com">
+        
+        <script src="https://apis.google.com/js/platform.js" async defer></script>
+
+        <!-- Import JS -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    
+        <script>
+            // Retrieving all the information stored in the session
+            window.sessionStorage;
+            var full_name = sessionStorage.getItem("full_name"); 
+            var full_name = full_name.substring(0, full_name.length - 1);
+            var image_url = sessionStorage.getItem("image_url");
+            var welcome_message_1 = "Welcome to your console page "
+            var welcome_message =  welcome_message_1.concat(full_name);
+            
+            // Display welcome message
+            document.getElementById("welcome_message").innerHTML = welcome_message;
+            
+        </script>
+
+    </head>
+
+    <body>
+        
+        <!-- Getting frame for data -->
+          <h1 id="welcome_message"></h1>
+
+          <script>
+              // Display welcome message
+            document.getElementById("welcome_message").innerHTML = welcome_message;
+          </script>
+
+          <h2>Profile Details</h2>
+          <img id="pic" class = "img-circle" width="100" height="100"/>
+          <script>
+              $("#pic").attr("src",image_url);
+          </script> 
+          <br><br>
+          
+          <button onclick="signOut()" class = "btn btn-danger">Sign Out</button>
+
+    </body>
+
+    <script>
+
+        function signOut()
+        {
+            var auth2=gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function(){
+
+            alert("You have successfully signed out");
+
+            $(".g-signin2").css("display","block");
+            $(".data").css("display","none");
+            });
+        }
+    </script>
+    </script>
+</html>

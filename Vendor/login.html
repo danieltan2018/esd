@@ -1,0 +1,85 @@
+<html lang="en">
+  <head>
+
+    <title>Google Sign In</title>
+
+    <!-- Bootstrap 4 -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+    <!-- API KEY -->
+    <meta name="google-signin-client_id" content="369460233382-4oa59s8nmq9cu2cu0q5kb6cka5og1rng.apps.googleusercontent.com">
+    
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+
+    <!-- Import JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <style>
+      /* Hide the login error. Only to be displayed if there is an error in login */
+      
+      .login_error{
+        display:none;
+      }
+
+    </style>
+
+  </head>
+
+  <body>
+
+    <!-- To be shown only if there is an errorx` -->
+    <div class="login_error">
+      <h1> DON'T TRY AND FUCK WITH ME BOI I KNOW YOU AINT ALLOWED TO LOGIN</h1>
+      <button onclick="location.href = 'login.html';" id="Retry" class="float-left submit-button" >Retry</button>
+    </div>
+
+
+    <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
+    <script>
+      function onSignIn(googleUser) {
+        // Useful data for your client-side scripts:
+        var profile = googleUser.getBasicProfile();
+        console.log("ID: " + profile.getId()); // Don't send this directly to your server!
+        console.log('Full Name: ' + profile.getName());
+        console.log('Given Name: ' + profile.getGivenName());
+        console.log('Family Name: ' + profile.getFamilyName());
+        console.log("Image URL: " + profile.getImageUrl());
+        console.log("Email: " + profile.getEmail());
+
+        // The ID token you need to pass to your backend:
+        var id_token = googleUser.getAuthResponse().id_token;
+        console.log("ID Token: " + id_token);
+
+        // Perform validation 
+        // Only allow email to pass if email ends with "@smu.edu.sg"
+        var email = profile.getEmail();
+        var email_organisation = email.split("@")[1];
+        
+
+        if (email_organisation == "smu.edu.sg") {
+          window.sessionStorage
+          // Get information to bring to the other realm 
+          var full_name = profile.getName();
+          var image_url = profile.getImageUrl();
+          sessionStorage.setItem("full_name", full_name);
+          sessionStorage.setItem("image_url",image_url);
+          window.location.replace("/vendor/vendor.html");
+        } else {
+          // If the account is wrong 
+          $(".g-signin2").css("display","none");
+          $(".login_error").css("display","block");
+        }
+
+
+        
+
+
+        // document.write(email.split("@")[1])
+
+
+      }
+    </script>
+  </body>
+</html>
+</html>
