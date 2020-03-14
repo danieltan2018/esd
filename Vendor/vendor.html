@@ -22,9 +22,6 @@
             var welcome_message_1 = "Welcome to your console page "
             var welcome_message =  welcome_message_1.concat(full_name);
             
-            // Display welcome message
-            document.getElementById("welcome_message").innerHTML = welcome_message;
-            
         </script>
 
     </head>
@@ -48,20 +45,99 @@
           
           <button onclick="signOut()" class = "btn btn-danger">Sign Out</button>
 
+            </script>
+
+<!-- Display table  -->
+
+        <div id="main-container" class="container">
+            <h1 class="display-4">Machine Status Listing</h1>
+            <table id="status_table" class='table table-striped' border='1'>
+                <thead class='thead-dark'>
+                    <tr>
+                        <th>Current User</th>
+                        <th>Error Code ID </th>
+                        <th>Location</th>
+                        <th>Machine ID</th>
+                        <th>Previous User</th>
+                        <th>Start Code</th>
+                        <th>Status Code ID</th>
+                        <th>Unlock Code</th>
+                    </tr>
+                </thead>
+            </table>
+
+        <script>
+            // Copy pasta
+            // Helper function to display error message
+            function showError(message) {
+                    // Hide the table and button in the event of error
+                    $('#status_table').hide();
+            
+                    // Display an error under the main container
+                    $('#main-container')
+                        .append("<label>"+message+"</label>");
+    }
+
+            // Copy pasta to retrieve information
+            // anonymous async function 
+            // - using await requires the function that calls it to be async
+            $(async() => {           
+                // Change serviceURL to your own
+                var serviceURL = "http://127.0.0.1:5000/status";
+        
+                try {
+                    const response =
+                    await fetch(
+                    serviceURL, { method: 'GET' }
+                    );
+                    const data = await response.json();
+                    var status = data.status; //the arr is in data.status of the JSON data
+        
+                    // array or array.length are false
+                    if (!status || !status.length) {
+                        showError('Status list empty or undefined.')
+                    } else {
+                        // for loop to setup all table rows with obtained status data
+                        var rows = "";
+                        for (const state of status) {
+                            eachRow =
+                                "<td>" + state.curuser + "</td>" +
+                                "<td>" + state.errcodeid + "</td>" +
+                                "<td>" + state.location + "</td>" +
+                                "<td>" + state.machineid + "</td>"+
+                                "<td>" + state.prevuser + "</td>" +
+                                "<td>" + state.startcode + "</td>" +
+                                "<td>" + state.statuscodeid + "</td>" +
+                                "<td>" + state.unlockcode + "</td>"
+                                ;
+                            rows += "<tbody><tr>" + eachRow + "</tr></tbody>";
+                        }
+                        // add all the rows to the table
+                        $('#status_table').append(rows);
+                    }
+                } catch (error) {
+                    // Errors when calling the service; such as network error, 
+                    // service offline, etc
+                    showError
+                    ('There is a problem retrieving machine status data, please try again later.<br />'+error);
+                
+                } // error
+            });
+    </script>
+</body>
+</html>
+        </script>
+    
+
+
     </body>
 
     <script>
 
         function signOut()
         {
-            var auth2=gapi.auth2.getAuthInstance();
-            auth2.signOut().then(function(){
-
             alert("You have successfully signed out");
-
-            $(".g-signin2").css("display","block");
-            $(".data").css("display","none");
-            });
+            window.location.replace("/vendor/login.html");
         }
     </script>
     </script>
