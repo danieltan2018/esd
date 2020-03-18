@@ -12,14 +12,14 @@ locations = ["novena","balestier","bukit panjang"]
 
 #Function to send message 
 def create(payload,URL):
-    sendURL = "http://127.0.0.1:5000/status/" + str(URL)
+    sendURL = "http://127.0.0.1:8002/status/" + str(URL)
     print(payload)
     print(sendURL)
     r = requests.post(sendURL,json=payload)
     # print(r.text)
 
 def update(payload,URL):
-    sendURL = "http://127.0.0.1:5000/status/" + str(URL)
+    sendURL = "http://127.0.0.1:8002/status/" + str(URL)
     print(payload)
     print(sendURL)
     r = requests.put(sendURL,json=payload)
