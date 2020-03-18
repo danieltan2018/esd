@@ -143,8 +143,8 @@
                                     "<td>" + state.location + "</td>" +
                                     "<td>" + state.machineid + "</td>"+
                                     "<td>" + state.statuscodeid + "</td>"+
-                                    "<td><button onclick=resolve("+ state.machineid + "," + state.location + ")> Resolve </button></td>";
-                                    console.log(typeof(state.location));
+                                    "<td><button onclick=resolve("+state.machineid+")> Resolve </button></td>";
+                                    // console.log(typeof(state.location));
                                     rows += "<tbody><tr>" + eachRow + "</tr></tbody>";
                                 }
                         }
@@ -176,8 +176,8 @@
         window.location.replace("/vendor/login.html");
     }
     
-   function resolve(machineid,location){
-        console.log("HELLO");
+   function resolve(machineid){
+        console.log(machineid);
     }
 
     </script>
