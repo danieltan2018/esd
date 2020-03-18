@@ -90,6 +90,7 @@ def update_machine(machineid, location):
         status.prevuser = prevuser
         status.startcode = startcode
         status.unlockcode = unlockcode
+            
     else:
         code = 400
         result =  {"code": code,"message": "No such Data"}
@@ -100,6 +101,16 @@ def update_machine(machineid, location):
         result = {"code": code,"message": "Error Updating Data"}
     
     if code == 200:
+        if errcodeid == 0 :
+            status.errcodeid = "none"
+        elif errcodeid == 1:
+            status.errcodeid = "Low on Detergent"
+        elif errcodeid == 2:
+            status.errcodeid = "Machine is Down"
+        elif errcodeid == 3:
+            status.errcodeid = "Water is Low"
+        else:
+            status.errcodeid = "Error Unknown Call Tier 3 Support"
         result = status.json()
     send_status(result)
     return str(result), code
@@ -134,7 +145,7 @@ def send_status(status):
     exchangename = "laundro_topic"
     channel.exchange_declare(exchange=exchangename, exchange_type='topic')
     message = json.dumps(status, default=str)
-    channel.basic_publish(exchange=exchangename, routing_key="machine.status", body=message)
+    
     
     if "code" in status:
         #inform Error
@@ -142,6 +153,12 @@ def send_status(status):
         channel.queue_bind(exchange=exchangename, queue='errorhandler', routing_key='*.error')
         channel.basic_publish(exchange=exchangename, routing_key="machine.error", body=message,properties=pika.BasicProperties(delivery_mode = 2))
         print("Status sent ({:d}) to error handler.".format(status["code"]))
+    elif status["errcodeid"] != 'none':
+        #inform Error
+        channel.queue_declare(queue='errorhandler', durable=True)
+        channel.queue_bind(exchange=exchangename, queue='errorhandler', routing_key='*.error')
+        channel.basic_publish(exchange=exchangename, routing_key="machine.error", body=message,properties=pika.BasicProperties(delivery_mode = 2))
+        print("Machine Error:",status["errcodeid"])
     else:
         #inform shipping
          channel.queue_declare(queue='monitoring', durable=True)
