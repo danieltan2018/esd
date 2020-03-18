@@ -1,6 +1,6 @@
 <html lang="en">
   <head>
-
+    
     <title>Google Sign In</title>
 
     <!-- Bootstrap 4 -->
@@ -22,6 +22,11 @@
         display:none;
       }
 
+      .g-signin2{
+        width="60";
+        height="100"
+      }
+
     </style>
 
   </head>
@@ -29,13 +34,22 @@
   <body>
 
     <!-- To be shown only if there is an errorx` -->
+    
+
+
+    <div class="jumbotron text-center">
+      <h1> Welcome to DE Laundro</h1>
+    </div>
+    <center><img src=washingmachine.png></center> <br><br>
+
     <div class="login_error">
-      <h1> DON'T TRY AND FUCK WITH ME BOI I KNOW YOU AINT ALLOWED TO LOGIN</h1>
-      <button onclick="location.href = 'login.html';" id="Retry" class="float-left submit-button" >Retry</button>
+      <center><font color="red"><h1> This account is unable to login. Please try again</h1></font></center>
+      <br>
+      </div>
     </div>
 
+    <center><div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div></center>
 
-    <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
     <script>
       function onSignIn(googleUser) {
         // Useful data for your client-side scripts:
@@ -67,17 +81,11 @@
           window.location.replace("/vendor/vendor.html");
         } else {
           // If the account is wrong 
-          $(".g-signin2").css("display","none");
+          // $(".g-signin2").css("display","none");
           $(".login_error").css("display","block");
+
         }
-
-
-        
-
-
         // document.write(email.split("@")[1])
-
-
       }
     </script>
   </body>
