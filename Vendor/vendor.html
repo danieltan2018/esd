@@ -1,5 +1,6 @@
 <html lang="en">
     <head>
+
         <title>Vendor Dashboard</title>
         <!-- Bootstrap 4 -->
         <!-- Latest compiled and minified CSS -->
@@ -143,7 +144,7 @@
                                     "<td>" + state.location + "</td>" +
                                     "<td>" + state.machineid + "</td>"+
                                     "<td>" + state.statuscodeid + "</td>"+
-                                    "<td><button onclick=resolve("+state.machineid+")> Resolve </button></td>";
+                                    "<td><button onclick=resolve("+state.machineid+ ",'"+state.location + "')> Resolve </button></td>";
                                     // console.log(typeof(state.location));
                                     rows += "<tbody><tr>" + eachRow + "</tr></tbody>";
                                 }
@@ -168,17 +169,60 @@
 
     </body>
 
-    <script>
 
+    <script>
+        
     function signOut()
     {
         alert("You have successfully signed out");
         window.location.replace("/vendor/login.html");
     }
     
-   function resolve(machineid){
+   function resolve(machineid,location){
         console.log(machineid);
-    }
+        console.log(location);
+        var put_url = "http://127.0.0.1:8002/status/" + machineid + "&" + location;
+        var payload = {
+            "curuser": 0,
+            "errcodeid": 1,
+            "location": location,
+            "machine_id":machineid,
+            "prevuser": 1,
+            "startcode": "none",
+            "statuscodeid": 0,
+            "unlockcode": "none" 
+        };
+        sendData(put_url, payload);
+   }
+        // console.log(payload);
+        // console.log(typeof(payload));
+
+    async function sendData(put_url,payload){
+        let requestParam = {
+            headers: { "content-type": "application/json" },
+            mode: 'cors', // allow cross-origin resource sharing
+            method: 'PUT',
+            body: JSON.stringify(payload)
+        }
+        try {
+            const response = await fetch(put_url, requestParam);
+            const data = await response.json();
+            console.log(data);
+            } catch (error) {
+            console.error(error);
+            }
+            location.reload();
+        }
+
+        // $.ajax({
+        //             url: put_url,    //Your api url
+        //             type: 'PUT',   //type is any HTTP method
+        //             data: payload,    //Data as js object
+        //             success: function () {
+        //                 location.reload()
+        //             }
+        //         })
+        //         ;
 
     </script>
     </script>
