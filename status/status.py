@@ -86,7 +86,6 @@ def get_location(location):
 def update_machine(machineid, location):
     code = 200
     result ={}
-    status = Status
     if(Status.query.filter_by(machineid=machineid,location=location).first()):
         status = Status.query.filter_by(machineid=machineid,location=location).first()
         errcodeid = request.json["errcodeid"]
