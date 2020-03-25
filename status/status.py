@@ -75,7 +75,6 @@ def get_location(location):
     return_location = []
     for status in Status.query.all():
         status_container = status.json()
-        print(status_container)
         if status_container['location'] not in return_location:
             return_location.append(status_container['location'])
     return jsonify({"Location": return_location})
@@ -166,7 +165,6 @@ def send_status(status):
                            queue='errorhandler', routing_key='*.error')
         channel.basic_publish(exchange=exchangename, routing_key="machine.error",
                               body=message, properties=pika.BasicProperties(delivery_mode=2))
-        print("Status sent ({:d}) to error handler.".format(status["code"]))
     elif status["errcodeid"] != 'none':
         # inform Error
         channel.queue_declare(queue='errorhandler', durable=True)
@@ -174,7 +172,6 @@ def send_status(status):
                            queue='errorhandler', routing_key='*.error')
         channel.basic_publish(exchange=exchangename, routing_key="machine.error",
                               body=message, properties=pika.BasicProperties(delivery_mode=2))
-        print("Machine Error:", status["errcodeid"])
     else:
         # inform shipping
         channel.queue_declare(queue='monitoring', durable=True)
@@ -182,7 +179,6 @@ def send_status(status):
                            queue='monitoring', routing_key='*.status')
         channel.basic_publish(exchange=exchangename, routing_key="machine.status",
                               body=message, properties=pika.BasicProperties(delivery_mode=2))
-        print("Status sent to monitoring", message)
     connection.close()
 
 
