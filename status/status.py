@@ -69,6 +69,18 @@ def find_by_machineid(machineid):
         return jsonify({"machineid": [status.json()for status in Status.query.filter_by(machineid=machineid).all()]})
     return jsonify({"message": "Machine not found."}), 404
 
+@app.route("/status/<string:location>")
+def get_location(location):
+     return_location = []
+     for status in Status.query.all():
+         status_container = status.json()
+         print(status_container)
+         if  status_container['location'] not in return_location:
+             return_location.append(status_container['location'])
+     print(return_location) 
+     return jsonify({"status": [status.json() for status in Status.query.all()]})
+    
+
 
 @app.route("/status/<int:machineid>&<string:location>", methods=['PUT'])
 def update_machine(machineid, location):
