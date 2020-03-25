@@ -69,49 +69,50 @@ def find_by_machineid(machineid):
         return jsonify({"machineid": [status.json()for status in Status.query.filter_by(machineid=machineid).all()]})
     return jsonify({"message": "Machine not found."}), 404
 
+
 @app.route("/status/<string:location>")
 def get_location(location):
-     return_location = []
-     for status in Status.query.all():
-         status_container = status.json()
-         print(status_container)
-         if  status_container['location'] not in return_location:
-             return_location.append(status_container['location']) 
-     return jsonify({"Location": return_location})
-    
+    return_location = []
+    for status in Status.query.all():
+        status_container = status.json()
+        print(status_container)
+        if status_container['location'] not in return_location:
+            return_location.append(status_container['location'])
+    return jsonify({"Location": return_location})
 
 
 @app.route("/status/<int:machineid>&<string:location>", methods=['PUT'])
 def update_machine(machineid, location):
     code = 200
-    result ={}
-    if(Status.query.filter_by(machineid=machineid,location=location).first()):
-        status = Status.query.filter_by(machineid=machineid,location=location).first()
+    result = {}
+    if(Status.query.filter_by(machineid=machineid, location=location).first()):
+        status = Status.query.filter_by(
+            machineid=machineid, location=location).first()
         errcodeid = request.json["errcodeid"]
         statuscodeid = request.json["statuscodeid"]
         curuser = request.json["curuser"]
         prevuser = request.json["prevuser"]
         startcode = request.json["startcode"]
         unlockcode = request.json["unlockcode"]
-        
+
         status.errcodeid = errcodeid
         status.statuscodeid = statuscodeid
         status.curuser = curuser
         status.prevuser = prevuser
         status.startcode = startcode
         status.unlockcode = unlockcode
-            
+
     else:
         code = 400
-        result =  {"code": code,"message": "No such Data"}
+        result = {"code": code, "message": "No such Data"}
     try:
         db.session.commit()
     except:
         code = 500
-        result = {"code": code,"message": "Error Updating Data"}
-    
+        result = {"code": code, "message": "Error Updating Data"}
+
     if code == 200:
-        if errcodeid == 0 :
+        if errcodeid == 0:
             status.errcodeid = "none"
         elif errcodeid == 1:
             status.errcodeid = "Low on Detergent"
@@ -129,10 +130,10 @@ def update_machine(machineid, location):
 @app.route("/status/<int:machineid>&<string:location>", methods=['POST'])
 def create_machine(machineid, location):
     code = 200
-    result ={}
+    result = {}
     if (Status.query.filter_by(machineid=machineid, location=location).first()):
         code = 400
-        result = {"code": code,"message": "Machine Already Exist"}
+        result = {"code": code, "message": "Machine Already Exist"}
     data = request.get_json()
     status = Status(machineid, **data)
     try:
@@ -140,45 +141,50 @@ def create_machine(machineid, location):
         db.session.commit()
     except:
         code = 500
-        result = {"code": code,"message": "Error Updating Data"}
+        result = {"code": code, "message": "Error Updating Data"}
     if code == 200:
         result = status.json()
     send_status(result)
     return str(result), code
 
+
 def send_status(status):
-    #Inform Monitoring and Error Handling
+    # Inform Monitoring and Error Handling
     hostname = "rabbit.delaundro.me"
     port = 5672
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=hostname, port=port))
+    connection = pika.BlockingConnection(
+        pika.ConnectionParameters(host=hostname, port=port))
     channel = connection.channel()
     exchangename = "laundro_topic"
     channel.exchange_declare(exchange=exchangename, exchange_type='topic')
     message = json.dumps(status, default=str)
-    
-    
+
     if "code" in status:
-        #inform Error
+        # inform Error
         channel.queue_declare(queue='errorhandler', durable=True)
-        channel.queue_bind(exchange=exchangename, queue='errorhandler', routing_key='*.error')
-        channel.basic_publish(exchange=exchangename, routing_key="machine.error", body=message,properties=pika.BasicProperties(delivery_mode = 2))
+        channel.queue_bind(exchange=exchangename,
+                           queue='errorhandler', routing_key='*.error')
+        channel.basic_publish(exchange=exchangename, routing_key="machine.error",
+                              body=message, properties=pika.BasicProperties(delivery_mode=2))
         print("Status sent ({:d}) to error handler.".format(status["code"]))
     elif status["errcodeid"] != 'none':
-        #inform Error
+        # inform Error
         channel.queue_declare(queue='errorhandler', durable=True)
-        channel.queue_bind(exchange=exchangename, queue='errorhandler', routing_key='*.error')
-        channel.basic_publish(exchange=exchangename, routing_key="machine.error", body=message,properties=pika.BasicProperties(delivery_mode = 2))
-        print("Machine Error:",status["errcodeid"])
+        channel.queue_bind(exchange=exchangename,
+                           queue='errorhandler', routing_key='*.error')
+        channel.basic_publish(exchange=exchangename, routing_key="machine.error",
+                              body=message, properties=pika.BasicProperties(delivery_mode=2))
+        print("Machine Error:", status["errcodeid"])
     else:
-        #inform shipping
-         channel.queue_declare(queue='monitoring', durable=True)
-         channel.queue_bind(exchange=exchangename, queue='monitoring', routing_key='*.status')
-         channel.basic_publish(exchange=exchangename, routing_key="machine.status", body=message,properties=pika.BasicProperties(delivery_mode = 2))
-         print("Status sent to monitoring", message)
+        # inform shipping
+        channel.queue_declare(queue='monitoring', durable=True)
+        channel.queue_bind(exchange=exchangename,
+                           queue='monitoring', routing_key='*.status')
+        channel.basic_publish(exchange=exchangename, routing_key="machine.status",
+                              body=message, properties=pika.BasicProperties(delivery_mode=2))
+        print("Status sent to monitoring", message)
     connection.close()
-        
-        
-    
+
 
 if __name__ == '__main__':
-    app.run(port=8002, debug=True)
+    app.run(host='0.0.0.0', port=8000, threaded=True)
