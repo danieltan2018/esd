@@ -24,7 +24,7 @@ class LaundQueue(db.Model):
     user_id = db.Column(db.Integer, nullable=False)
     machine_id = db.Column(db.Integer, nullable=False)
     availability = db.Column(db.Boolean, nullable = False)
-    service_type = db.Column(db.Integer, nullable = False)
+    service_type = db.Column(db.String, nullable = False)
     date_time = db.Column(db.DateTime, nullable =False)
  
     def __init__(self, queue_id, user_id, machine_id, location, availability, service_type, date_time):
@@ -76,22 +76,23 @@ def insert_queue(user_id, queue_id, location, date_time, service_type):
     try:
         db.session.add(laundqueue)
         db.session.commit()
+        new_queue_length= LaundQueue.query.filter_by(location=location).count()
     except:
         code = 500
-        result = {"code": code,"message": "Error Updating Data"}
+        result = {"code": code,"message": "Error Updating Data", "new queue length":new_queue_length}
     if code == 200:
-        result = status.json()
+        result = laundqueue.json()
     send_status(result)
     return str(result), code
 
 
 
 
-#add new service type
-@app.route("/queue/<string:user_id>", methods=['POST'])
-def add_new_service_request(user_id):
-    user_id = LaundQueue.query.get(user_id)
-    new_service_request = request.json["service_type"]
+# #add new service type
+# @app.route("/queue/<string:user_id>", methods=['POST'])
+# def add_new_service_request(user_id):
+#     user_id = LaundQueue.query.get(user_id)
+#     new_service_request = request.json["service_type"]
 
 #Calculate and return waiting time
 @app.route("/queue/<string:location>")
@@ -121,23 +122,37 @@ def laundqueue_list(location):
         return jsonify({location+" queue": [laundqueue.json()for laundqueue in LaundQueue.query.filter_by(location=location).all()]})
     return jsonify({"message": "There is no queue in this location."}), 404
 
-#Insert into Queue and return Queue length
-@app.route("/queue/<string:location>&<string:user_id")
-
-
 
 #Return next user, assigned machine
-@app.route("/queue/<string:location>&<string:location>&<string:location>")
+@app.route("/queue/<string:location>")
+laundqueue = LaundQueue.query.filter_by(location=location).first()
+next_user = laundqueue.json()["user_id"]
+avail_machine = get_avail_machine_id(location)
+if next_user:
+    return jsonify({"user_id": next_user for next_user in LaundQueue.query.filter_by(location=location).first()],"machine_id":avail_machine})
+return jsonify({"message": "user not found."}), 404
+
+
 #Return wash type, duration, cost
-@app.route("/Queue/<string:queue_id>")
-laundqueue = LaundQueue.query.filter_by(queue_id= queue_id).first()
-    if Queue:
-        return jsonify({"queue_id": [Queue.json()for Queue in Queue.query.filter_by(queue_id=queue_id).all()]})
-    return jsonify({"message": "Machine not found."}), 404
+@app.route("/queue/<string:user_id>&<string: location")
+laundqueue = LaundQueue.query.filter_by(user_id = user_id, location = location).first()
+wash_type = laundqueue.json()["service_type"]
+def calc_cost(wash_type):
+    if wash_type == "standard wash":
+        cost = 5
+    elif wash_type == "double wash":
+        cost = 6
+    elif wash_type == "hot wash"
+        cost = 7
+    return cost
+
+if laundqueue:
+    return jsonify({"user_id": user_id, "wash_type": wash_type,"duration":45, "cost":calc_cost(wash_type) })
+return jsonify({"message": "Machine not found."}), 404
 
 # #Remove from Queue
-@app.route("/Queue/<string:location>&<int:queue_id>")
-def remove_from_Queue(location, queue_id):
+@app.route("/queue/<string:location>&<int:queue_id>")
+def remove_from_queue(location, queue_id):
     laundqueue = LaundQueue.query.filter_by(location= location, queue_id= queue_id)
     db.session.delete(laundqueue)
     db.commit()
