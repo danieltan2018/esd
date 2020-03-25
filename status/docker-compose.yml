@@ -14,3 +14,5 @@ services:
       - db
     ports:
       - "8002"
+volumes:
+  db:
