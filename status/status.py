@@ -76,9 +76,8 @@ def get_location(location):
          status_container = status.json()
          print(status_container)
          if  status_container['location'] not in return_location:
-             return_location.append(status_container['location'])
-     print(return_location) 
-     return jsonify({"status": [status.json() for status in Status.query.all()]})
+             return_location.append(status_container['location']) 
+     return jsonify({"Location": return_location})
     
 
 
