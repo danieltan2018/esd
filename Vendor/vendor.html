@@ -4,6 +4,28 @@
             <h1> DE Laundro Dashboard</h1>
           </div>
 
+            
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <!-- <a class="navbar-brand" href="index.html">Navbar</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button> -->
+  
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+
+        <li class="nav-item active">
+          <a class="nav-link" href="vendor.html">Dashboard <span class="sr-only"></span></a>
+        </li>
+
+        <li class="nav-item active">
+          <a class="nav-link" href="monitoring.html">Monitoring <span class="sr-only"></span></a>
+        </li>
+
+      </ul>
+    </div>
+  </nav>
+
         <title>Vendor Dashboard</title>
         <!-- Bootstrap 4 -->
         <!-- Latest compiled and minified CSS -->
@@ -21,15 +43,18 @@
             // Retrieving all the information stored in the session
             window.sessionStorage;
             var full_name = sessionStorage.getItem("full_name"); 
+
+            // Validation in case no sign in 
             if(full_name==null){
                 window.location.replace("login.html");
             }
+            
             var full_name = full_name.substring(0, full_name.length - 1);
             var image_url = sessionStorage.getItem("image_url");
             var welcome_message_1 = "Welcome to your console page "
             var welcome_message =  welcome_message_1.concat(full_name);
 
-            // Validation in case no sign in 
+            
             
             
         </script>

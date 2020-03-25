@@ -1,0 +1,50 @@
+<html lang="en">
+    <head>
+        <div class="jumbotron text-center">
+            <h1> DE Laundro Dashboard</h1>
+        </div>
+
+        <!-- Navigation Bar  -->
+        <nav>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+
+                <li class="nav-item active">
+                    <a class="nav-link" href="vendor.html">Dashboard <span class="sr-only"></span></a>
+                </li>
+
+                <li class="nav-item active">
+                    <a class="nav-link" href="monitoring.html">Monitoring <span class="sr-only"></span></a>
+                </li>
+
+                </ul>
+            </div>
+        </nav>
+
+        <title>Monitoring</title>
+        <!-- Bootstrap 4 -->
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+        <!-- API KEY -->
+        <meta name="google-signin-client_id" content="369460233382-4oa59s8nmq9cu2cu0q5kb6cka5og1rng.apps.googleusercontent.com">
+        
+        <script src="https://apis.google.com/js/platform.js" async defer></script>
+
+        <!-- Import JS -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    
+        <script>
+            // Retrieving all the information stored in the session
+            window.sessionStorage;
+            var full_name = sessionStorage.getItem("full_name"); 
+
+            // Validation in case no sign in 
+            if(full_name==null){
+                window.location.replace("login.html");
+            }
+                        
+        </script>
+
+</head>
+</html>
