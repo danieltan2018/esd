@@ -22,7 +22,7 @@
             window.sessionStorage;
             var full_name = sessionStorage.getItem("full_name"); 
             if(full_name==null){
-                window.location.replace("login.html");
+                window.location.replace("index.html");
             }
             var full_name = full_name.substring(0, full_name.length - 1);
             var image_url = sessionStorage.getItem("image_url");
@@ -184,7 +184,7 @@
     function signOut()
     {
         alert("You have successfully signed out");
-        window.location.replace("/vendor/login.html");
+        window.location.replace("index.html");
     }
     
    function resolve(machineid,location){
