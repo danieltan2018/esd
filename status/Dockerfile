@@ -1,7 +1,7 @@
 FROM python:3.7
 EXPOSE 8002
-COPY requirements.txt /app
-WORKDIR /app
+WORKDIR /WORKDIR
+COPY requirements.txt /WORKDIR
 RUN pip install -r requirements.txt
-COPY status.py /app
+COPY status.py /WORKDIR
 CMD python status.py
