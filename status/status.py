@@ -22,11 +22,11 @@ class Status(db.Model):
     machineid = db.Column(db.Integer, primary_key=True)
     statuscodeid = db.Column(db.Integer, nullable=False)
     location = db.Column(db.String(100), primary_key=True)
-    curuser = db.Column(db.Integer, nullable=False)
-    prevuser = db.Column(db.Integer, nullable=False)
+    curuser = db.Column(db.Integer, nullable=True)
+    prevuser = db.Column(db.Integer, nullable=True)
     errcodeid = db.Column(db.Integer, nullable=False)
-    unlockcode = db.Column(db.String(1000), nullable=False)
-    startcode = db.Column(db.String(1000), nullable=False)
+    unlockcode = db.Column(db.String(1000), nullable=True)
+    startcode = db.Column(db.String(1000), nullable=True)
 
     def __init__(self, machineid, statuscodeid, location, curuser, prevuser, errcodeid, unlockcode, startcode):
         self.machineid = machineid
@@ -136,10 +136,32 @@ def update_machine_User():
             code = 400
             result = {"code": code, "message": "Duplicate Userid"}
         else:
-            prevuser = status.curuser
-            status.prevuser = prevuser
-            status.unlockcode = uuid.uuid1()
-            status.curuser = request.json["curuser"]  
+            #if request.json["curuser"]:
+            #    status.curuser = request.json["curuser"]
+            #    startcode = uuid.uuid4()
+            #    status.startcode = startcode.hex
+            #if status.curuser == None:
+            #    prevuser = status.curuser
+            #    status.prevuser = prevuser
+            #    status.unlockcode = status.startcode
+            if status.curuser == None:
+                status.curuser = request.json["curuser"]
+                startcode = uuid.uuid4()
+                status.startcode = startcode.hex
+            elif status.curuser != None:
+                prevuser = status.curuser
+                prevusercode = status.startcode
+                status.curuser = request.json["curuser"]
+                startcode = uuid.uuid4()
+                status.startcode = startcode.hex
+                status.prevuser = prevuser
+                status.unlockcode = prevusercode
+                         
+                  
+                
+        
+                 
+            
 
     else:
         code = 400
