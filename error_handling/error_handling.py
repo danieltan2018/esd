@@ -25,20 +25,21 @@ def receiveError():
 def callback(channel, method, properties, body): # required signature for the callback; no return
     print("Received an error by " + __file__)
     processError(json.loads(body))
+    sendMessage(json.loads(body))
     print()
 
 def processError(order):
     print("Recording an error:")
     print(order)
 
-def sendMessage():
+def sendMessage(order):
     return requests.post(
         "https://api.mailgun.net/v3/delaundro.me/messages",
         auth=("api", MAILGUNKEY),
         data={"from": "DeLaundro <do_not_reply@delaundro.me>",
               "to": ["admin@delaundro.me"],
               "subject": "Machine Error",
-              "text": "Error status on machine reported, please fix asap!"}
+              "text": "Error: ".order." observed, please fix asap",
               "o:tracking": False})
 
 if __name__ == "__main__":  # execute this program only if it is run as a script (not by 'import')
