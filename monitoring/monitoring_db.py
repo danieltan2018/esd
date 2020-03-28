@@ -50,7 +50,16 @@ def get_all():
     return {'monitoring': [monitoring.json() for monitoring in Monitoring.query.all()]}
 
 # Log machine statuses 
-@app.route("/monitoring/add",methods=['POST'])
+# @app.route("/monitoring/add",methods=['POST'])
+# AMQP
+channelqueue = channel.queue_declare(queue="status", durable=True)
+queue_name = channelqueue.method.queue
+channel.queue_bind(exchange=exchangename,
+                    queue=queue_name, routing_key='#')
+channel.basic_consume(
+    queue=queue_name, on_message_callback=insert_log, auto_ack=True)
+channel.start_consuming()
+
 def insert_log():
     code = 200
     result = {}
