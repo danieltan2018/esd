@@ -4,7 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
 import json
-from datetime import datetime
+from datetime import date
+import datetime
 
 app = Flask(__name__)
 dbURL = 'mysql+mysqlconnector://root@localhost:3306/monitoring'
@@ -22,8 +23,8 @@ class Monitoring(db.Model):
     location = db.Column(db.String(100), primary_key=True)
     statuscodeid = db.Column(db.Integer, nullable=False)
     errcodeid = db.Column(db.Integer, nullable=False)
-    payment = db.Column(db.Boolean, nullable=False)
-    date_time = db.Column(db.DateTime, nullable =False)
+    payment = db.Column(db.Integer, nullable=False)
+    date_time = db.Column(db.String(100), nullable =False)
 
     def init(self, m_id, machineid, location, statuscodeid, errcodeid, payment, date_time):
         self.m_id = m_id
@@ -54,34 +55,16 @@ def insert_log():
     code = 200
     result = {}
     data = request.get_json()
-    machineid = request.json["machineid"]
-    location = request.json["location"]
-    statuscodeid = request.json["statuscodeid"]
-    errcodeid = request.json["errcodeid"]
-    if request.json["payment"] == None:
-        payment = 0
-    else:
-        payment =1
-
-    date_time = datetime.datetime.now()
-
-    payload = {
-        "machineid": machineid,
-        "location": location,
-        "statuscodeid": statuscodeid,
-        "errcodeid": errcodeid,
-        "payment": payment,
-        "date_time": date_time
-    }   
-
+    monitoring = Monitoring(**data)
+    print(monitoring)
     try:
-        db.session.add(payload)
+        db.session.add(monitoring)
         db.session.commit()
     except:
         code = 500
         result = {"code": code, "message": "Error Updating Data"}
     if code == 200:
-        result = log.json()
+        result = monitoring.json()
     return str(result), code
 
 
