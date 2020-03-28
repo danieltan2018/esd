@@ -7,6 +7,7 @@ import json
 import pika
 import requests
 from urllib.request import urlretrieve
+import datetime
 
 statusURL = "http://127.0.0.1:8002/status"
 
@@ -23,23 +24,23 @@ class LaundQueue(db.Model):
     queue_id = db.Column(db.Integer, primary_key=True)
     location = db.Column(db.String(64), primary_key = True)
     user_id = db.Column(db.Integer, nullable=False)
-    machine_id = db.Column(db.Integer, nullable=False)
-    status_code = db.Column(db.Integer, nullable = False)
-    service_type = db.Column(db.String(64), nullable = False)
+    machine_id = db.Column(db.Integer, nullable=True)
+    status_code = db.Column(db.Integer, nullable = True)
+    service_type = db.Column(db.String(64), nullable = True)
     date_time = db.Column(db.DateTime, nullable =False)
  
-    def __init__(self, queue_id, user_id, machine_id, location, availability, service_type, date_time):
+    def __init__(self, queue_id, user_id, machine_id, location, service_type, date_time, status_code):
         self.queue_id = queue_id
         self.user_id = user_id
         self.machine_id = machine_id
         self.location = location
-        self.availability = availability
         self.service_type = service_type
         self.date_time = date_time
+        self.status_code = status_code
 
 
     def json(self):
-        return {"queue_id": self.queue_id, "user_id": self.user_id, "machine_id":self.machine_id, "location":self.location, "availability": self.availability, 
+        return {"queue_id": self.queue_id, "user_id": self.user_id, "machine_id":self.machine_id, "location":self.location, "status_code": self.status_code, 
         "service_type": self.service_type,"date_time":self.date_time}
 
         
@@ -50,46 +51,27 @@ if not database_exists(engine.url):
 db.create_all()
 db.session.commit()
 
-# Request available machine by location 
-@app.route("/queue/<string:location>")
-def get_avail_machine_id(location):
-    queryURL = statusURL
-    results = LaundQueue.query.filter_by(location=location).first()
-    #print("here", results)
-    if not results:
-        queryURL = statusURL +"/"+ location + "&0"
-    return requests.get(queryURL).text
-    
-        # return jsonify(r.json())
 
 
-@app.route("/queue/<string:user_id>&<string:location>", methods=['POST'])
-def insert_queue(user_id, queue_id, location, date_time, service_type):
+@app.route("/newqueue/<string:user_id>&<string:location>&<string:wash_type>")
+def insert_queue(user_id, location, wash_type):
+    date_time = datetime.datetime.now()
     code = 200
     result ={}
-    #laundqueue = LaundQueue.query.filter_by(location=location, user_id = user_id).all()
-    laundqueue = LaundQueue.query.filter_by(location=location).first()
-    if(LaundQueue.query.filter_by(queue_id = queue_id, location = location).first()):
-        code = 400
-        result = {"code": code,"message": "Queue ID Already Exists"}
-    data = request.get_json()
-    for item in data:
-        user_id = item["user_id"]
-        location = item["location"]
-
-    laundqueue.user_id = user_id
-    laundqueue.location = location
-
-    # if(LaundQueue.query.filter_by(location=location).first()):
-    #     last_queue_id = max([ o["queue_id"] for o in laundqueue["queue_id"] ])
-    #     new_queue_id = last_queue_id+1
+    new_queue_length = 0
+    laundqueue = {
+        "user_id": user_id,
+        "location": location,
+        "wash_type": wash_type,
+        "date_time":date_time,
+    }
     try:
         db.session.add(laundqueue)
         db.session.commit()
-        new_queue_length= LaundQueue.query.filter_by(location=location).count()
+        new_queue_length+= LaundQueue.query.filter_by(location=location).count()
     except:
         code = 500
-        result = {"code": code,"message": "Error Updating Data", "new queue length":new_queue_length}
+        result = {"code": code,"message": "Error Updating Data"}
     if code == 200:
         result = laundqueue.json()
     return str(result), code
@@ -102,26 +84,30 @@ def insert_queue(user_id, queue_id, location, date_time, service_type):
 #     new_service_request = request.json["service_type"]
 
 #Calculate and return waiting time
-@app.route("/queue/<string:location>")
+@app.route("/waittime/<string:location>")
 def calculate_wait_time(location):
+    queryURL = statusURL
+    machines = int(requests.get(queryURL).text)
     wait_time = 0
     if(LaundQueue.query.filter_by(location=location).first()):
         queue_length = LaundQueue.query.filter_by(location=location).count()
-        wait_time += 45*queue_length
+        wait_time += (45*queue_length)/machines
     return wait_time
 
+# # Request available machine by location 
+# @app.route("/queue/<string:location>")
+# def get_avail_machine_id(location):
+#     queryURL = statusURL
+#     results = LaundQueue.query.filter_by(location=location).first()
+#     #print("here", results)
+#     if not results:
+#         queryURL = statusURL +"/"+ location + "&0"
+#     return requests.get(queryURL).text
+    
+        # return jsonify(r.json())
         
-# #Insert location
-# # @app.route("/LaundQueue/<string:location>", methods=['POST'])
-# # def insert_location(location):
-# #     code = 200
-# #     result ={}
-# #     laundQueue = LaundQueue
-# #     if location not in (LaundQueue.query.filter_by(location=location).all()):
-# #         Queue = Queue.query.filter_by(location=location).first()
-
 #Return list of Queues        
-@app.route("/queue/<string:location>")
+@app.route("/queuelist/<string:location>")
 def laundqueue_list(location):
     laundqueue = LaundQueue.query.filter_by(
         location=location).all()
@@ -131,42 +117,44 @@ def laundqueue_list(location):
     return jsonify({"message": "There is no queue in this location."}), 404
 
 
-#Return next user, assigned machine
-@app.route("/queue/<string:location>")
+#Return next user, assigned queue_id
+@app.route("/nextuser/<string:location>")
 def next_user(location):
     laundqueue = LaundQueue.query.filter_by(location=location).first()
     next_user = laundqueue.json()["user_id"]
-    avail_machine = get_avail_machine_id(location=location)
-    if next_user:
-        return jsonify({"user_id": (next_user for next_user in LaundQueue.query.filter_by(location=location).first()),
-         "machine_id":avail_machine})
-    return jsonify({"message": "user not found."}), 404
+    queue_id = laundqueue.json()["queue_id"]
+    if next_user:   
+        return jsonify({"user_id": next_user, "queue_id":queue_id})
+    return jsonify({"message": "No user in the queue"}), 404
 
 
 #Return wash type, duration, cost
-@app.route("/queue/<string:user_id>&<string:location>")
+# Dequeue
+@app.route("/serviceDequeue/<int:user_id>&<string:location>")
 def service_details(user_id, location):
+    cost = 0
     laundqueue = LaundQueue.query.filter_by(user_id = user_id, location = location).first()
     wash_type = laundqueue.json()["service_type"]
-    def calc_cost(wash_type):
-        if wash_type == "standard wash":
-            cost = 5
-        elif wash_type == "double wash":
-            cost = 6
-        elif wash_type == "hot wash":
-            cost = 7
-        return cost
+    if wash_type == "standard wash":
+        cost = 5
+    elif wash_type == "double wash":
+        cost = 6
+    elif wash_type == "hot wash":
+        cost = 7
 
     if laundqueue:
-        return jsonify({"user_id": user_id, "wash_type": wash_type,"duration":45, "cost":calc_cost(wash_type) })
+        db.session.delete(laundqueue)
+        db.session.commit()
+        return jsonify({"user_id": user_id, "wash_type": wash_type,"duration":45, "cost":cost })
+
     return jsonify({"message": "Machine not found."}), 404
 
-# #Remove from Queue
-@app.route("/queue/<string:location>&<int:queue_id>")
-def remove_from_queue(location, queue_id):
-    laundqueue = LaundQueue.query.filter_by(location= location, queue_id= queue_id)
-    db.session.delete(laundqueue)
-    db.commit()
+# # #Remove from Queue
+# @app.route("/dequeue/<string:location>&<int:queue_id>")
+# def remove_from_queue(location, queue_id):
+#     laundqueue = LaundQueue.query.filter_by(location= location, queue_id= queue_id)
+#     db.session.delete(laundqueue)
+#     db.commit()
 
 
 if __name__ == '__main__':
