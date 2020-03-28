@@ -79,8 +79,9 @@ def insert_queue():
 #     new_service_request = request.json["service_type"]
 
 #Calculate and return waiting time
-@app.route("/waittime/<string:location>")
-def calculate_wait_time(location):
+@app.route("/calculateWaitTime")
+def calculate_wait_time():
+    location = request.args.get('location')
     queryURL = statusURL
     machines = int(requests.get(queryURL).text)
     wait_time = 0
@@ -102,8 +103,9 @@ def calculate_wait_time(location):
         # return jsonify(r.json())
         
 #Return list of Queues        
-@app.route("/queuelist/<string:location>")
-def laundqueue_list(location):
+@app.route("/queuelist")
+def laundqueue_list():
+    location = request.args.get('location')
     laundqueue = LaundQueue.query.filter_by(
         location=location).all()
     if laundqueue:
@@ -113,8 +115,9 @@ def laundqueue_list(location):
 
 
 #Return next user, assigned queue_id
-@app.route("/nextuser/<string:location>")
-def next_user(location):
+@app.route("/nextuser")
+def next_user():
+    location = request.args.get('location')
     laundqueue = LaundQueue.query.filter_by(location=location).first()
     next_user = laundqueue.json()["user_id"]
     queue_id = laundqueue.json()["queue_id"]
@@ -125,8 +128,10 @@ def next_user(location):
 
 #Return wash type, duration, cost
 # Dequeue
-@app.route("/serviceDequeue/<int:user_id>&<string:location>")
-def service_details(user_id, location):
+@app.route("/serviceDequeue")
+def service_details():
+    user_id = request.args.get('user_id')
+    location = request.args.get('location')
     cost = 0
     laundqueue = LaundQueue.query.filter_by(user_id = user_id, location = location).first()
     wash_type = laundqueue.json()["service_type"]
