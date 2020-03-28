@@ -53,6 +53,25 @@ def get_available():
     return jsonify({"status": [status.json() for status in Status.query.all()]})
 
 
+@app.route("/countMachine")
+def count_by_location():
+    location = request.args.get('location')
+    status_all = Status.query.filter_by(location=location).all()
+    totalMachine = len(status_all)
+    status_unavailable = Status.query.filter_by(location=location, errcodeid=0).all()
+    unavailMachine = len(status_unavailable)
+    status_available = Status.query.filter_by(location=location, errcodeid=1).all()
+    availMachine = len(status_available)
+    status_down = Status.query.filter_by(location=location, errcodeid=2).all()
+    downMachine = len(status_down)
+    totallessbroken = (unavailMachine+availMachine)
+    if status_all:
+        
+        
+        return jsonify({"locationtotalmachine":totalMachine, "numberofdown":downMachine, "availandunavail":totallessbroken})
+    return jsonify({"message": "Error Finding Machine."}), 404
+
+
 @app.route("/findAvailMachine")
 def find_by_location():
     location = request.args.get('location')
@@ -269,6 +288,9 @@ def update_machine_In_Use():
         result = status.json()
     send_status(result)
     return str(result), code
+
+
+
 
 
 def send_status(status):
