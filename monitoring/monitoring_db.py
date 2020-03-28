@@ -45,7 +45,7 @@ db.create_all()
 db.session.commit()
 
 # Return all the monitoring information 
-@app.route("/monitoring")
+@app.route("/")
 def get_all():
     return {'monitoring': [monitoring.json() for monitoring in Monitoring.query.all()]}
 
