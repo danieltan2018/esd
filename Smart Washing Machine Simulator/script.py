@@ -118,3 +118,31 @@ if user_command == "modify":
     
     update(payload,URL)
     
+# Use a particular machine 
+if user_command == "use machine":
+    
+    # Getting necessary parameters
+    location = input("Where are you now?")
+    machine_id = input("What is your Machine ID?")
+    qrcode = input("What is your QR Code?")
+
+    # Calling microservice
+
+    URL = http://status.delaundro.me:8002/status/qrcode
+
+    r = requests.get(URL)
+    # print(r.text)
+    
+    unlockcode = r.get_json()["unlockcode"]
+    startcode = r.get_json()["startcode"]
+    
+    if unlockcode == qrcode:
+        print "Door open"
+
+    if startcode == qrcode:
+        print "Machine started"
+
+        # Change status of machine 
+        change_status_url = "http://status.delaundro.me:8002/status/changestatus/" + location + "&" + machine_id
+        x = requests.get(change_status_url)
+        # print (x.text)
