@@ -1,1 +1,1 @@
-from flask_cors import CORS
+turn_loca

@@ -1,3 +1,5 @@
 .vscode/*
 *.pem
 *.key
+*.pyc
+.DS_Store

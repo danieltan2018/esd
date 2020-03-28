@@ -8,18 +8,18 @@ import json
 import requests
 
 #Store locations into an array
-locations = ["novena","balestier","bukit panjang"]
+locations = ["Novena","Balestier","Bukit Panjang"]
 
 #Function to send message 
 def create(payload,URL):
-    sendURL = "http://127.0.0.1:8002/status/" + str(URL)
+    sendURL = "http://status.delaundro.me:8002/status/" + str(URL)
     print(payload)
     print(sendURL)
     r = requests.post(sendURL,json=payload)
     # print(r.text)
 
 def update(payload,URL):
-    sendURL = "http://127.0.0.1:8002/status/" + str(URL)
+    sendURL = "http://status.delaundro.me:8002/status/" + str(URL)
     print(payload)
     print(sendURL)
     r = requests.put(sendURL,json=payload)

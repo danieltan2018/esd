@@ -14,31 +14,28 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 CORS(app)
 
-
 class Monitoring(db.Model):
-    __tablename__ = 'monitoring'
+    tablename = 'monitoring'
 
-    m_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    location = db.Column(db.String, nullable=False)
-    machine_id = db.Column(db.Integer, nullable=False)
-    m_status = db.Column(db.String, nullable=False)  # on,off,unavailable
-    # machine spoil, no detergent etc
-    error = db.Column(db.String, nullable=False)
-    payment = db.Column(db.String)  # incomplete, complete
-    datetime_now = db.Column(db.DateTime, default=datetime.now)
+    m_id = db.Column(db.Integer, primary_key=True, autoincrement=True) #primary key finder
+    machineid = db.Column(db.Integer, primary_key=True)
+    location = db.Column(db.String(100), primary_key=True)
+    statuscodeid = db.Column(db.Integer, nullable=False)
+    errcodeid = db.Column(db.Integer, nullable=False)
+    payment = db.Column(db.Boolean, nullable=False)
+    date_time = db.Column(db.DateTime, nullable =False)
 
-    def __init__(m_id, location, machine_id, datetime_now, status, error, payment):
+    def init(self, m_id, machineid, location, statuscodeid, errcodeid, payment, date_time):
         self.m_id = m_id
+        self.machineid = machineid
         self.location = location
-        self.machine_id = machine_id
-        self.datetime_now = datetime_now
-        self.m_status = m_status
-        self.error = error
+        self.statuscodeid = statuscodeid
+        self.errcodeid = errcodeid
         self.payment = payment
+        self.date_time = date_time
 
     def json(self):
-        return {"m_id": self.m_id, "location": self.location, "machine_id": self.machine_id, "status_m": self.m_status, "error": self.error, "payment": self.payment, "datetime_now": self.datetime_now}
-
+        return {"m_id": self.m_id, "machineid": self.machineid, "location": self.location, "statuscodeid": self.statuscodeid, "errcodeid": self.errcodeid, "payment": self.payment, "date_time": self.date_time}
 
 engine = create_engine(dbURL)
 if not database_exists(engine.url):
@@ -46,10 +43,27 @@ if not database_exists(engine.url):
 db.create_all()
 db.session.commit()
 
-
+# Return all the monitoring information 
 @app.route("/monitoring")
 def get_all():
     return {'monitoring': [monitoring.json() for monitoring in Monitoring.query.all()]}
+
+# Log machine statuses 
+@app.route("/monitoring/add",methods=['POST'])
+def insert_log():
+    code = 200
+    result = {}
+    data = request.get_json()
+    log = log(**data)
+    try:
+        db.session.add(status)
+        db.session.commit()
+    except:
+        code = 500
+        result = {"code": code, "message": "Error Updating Data"}
+    if code == 200:
+        result = log.json()
+    return str(result), code
 
 
 if __name__ == '__main__':

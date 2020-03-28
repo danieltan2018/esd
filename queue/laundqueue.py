@@ -71,7 +71,7 @@ def insert_queue(user_id, queue_id, location, date_time, service_type):
     laundqueue = LaundQueue.query.filter_by(location=location).first()
     if(LaundQueue.query.filter_by(queue_id = queue_id, location = location).first()):
         code = 400
-        result = {"code": code,"message": "Queue ID Already Exist"}
+        result = {"code": code,"message": "Queue ID Already Exists"}
     data = request.get_json()
     for item in data:
         user_id = item["user_id"]
