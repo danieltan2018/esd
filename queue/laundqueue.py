@@ -7,7 +7,7 @@ import json
 import pika
 import requests
 from urllib.request import urlretrieve
-import datetime
+from datetime import datetime
 
 statusURL = "http://127.0.0.1:8002/status"
 
@@ -21,7 +21,7 @@ db = SQLAlchemy(app)
 class LaundQueue(db.Model):
     __tablename__ = 'queue'
  
-    queue_id = db.Column(db.Integer, primary_key=True)
+    queue_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     location = db.Column(db.String(64), primary_key = True)
     user_id = db.Column(db.Integer, nullable=False)
     machine_id = db.Column(db.Integer, nullable=True)
@@ -57,18 +57,19 @@ db.session.commit()
 def insert_queue():
     code = 200
     result = {}
-    data = request.get_json()
-    print(data)
-    laundqueue = LaundQueue(**data)
-    print(laundqueue)
+    location = request.args.get('location')
+    user_id = request.args.get('user_id')
+    now = datetime.now()
+    data = {"queue_id":None, "location": location, "user_id": user_id, "machine_id":None, "service_type":None, "status_code":None, "date_time":now}
+    laundQueue = LaundQueue(**data)
     try:
-        db.session.add(laundqueue)
+        db.session.add(laundQueue)
         db.session.commit()
     except:
         code = 500
         result = {"code": code, "message": "Error Updating Data"}
     if code == 200:
-        result = laundqueue.json()
+        result = laundQueue.json()
     return str(result), code
 
 
