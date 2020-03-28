@@ -5,6 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
 import json
 import pika
+import uuid
 
 app = Flask(__name__)
 dbURL = 'mysql+mysqlconnector://root@db:3306/status'
@@ -47,7 +48,6 @@ if not database_exists(engine.url):
 db.create_all()
 db.session.commit()
 
-
 @app.route("/")
 def get_available():
     return jsonify({"status": [status.json() for status in Status.query.all()]})
@@ -83,8 +83,8 @@ def get_location():
     return jsonify({"Location": return_location})
 
 
-@app.route("/updateMachine", methods=['PUT'])
-def update_machine():
+@app.route("/updateMachineError", methods=['PUT'])
+def update_machine_Error():
     machineid = request.args.get('machineid')
     location = request.args.get('location')
     code = 200
@@ -92,19 +92,10 @@ def update_machine():
     if(Status.query.filter_by(machineid=machineid, location=location).first()):
         status = Status.query.filter_by(
             machineid=machineid, location=location).first()
+        
         errcodeid = request.json["errcodeid"]
-        statuscodeid = request.json["statuscodeid"]
-        curuser = request.json["curuser"]
-        prevuser = request.json["prevuser"]
-        startcode = request.json["startcode"]
-        unlockcode = request.json["unlockcode"]
-
         status.errcodeid = errcodeid
-        status.statuscodeid = statuscodeid
-        status.curuser = curuser
-        status.prevuser = prevuser
-        status.startcode = startcode
-        status.unlockcode = unlockcode
+
 
     else:
         code = 400
@@ -131,6 +122,40 @@ def update_machine():
     return str(result), code
 
 
+@app.route("/updateMachineUser", methods=['PUT'])
+def update_machine_User():
+    machineid = request.args.get('machineid')
+    location = request.args.get('location')
+    code = 200
+    result = {}
+    if(Status.query.filter_by(machineid=machineid, location=location, errcodeid=0).first()):
+        status = Status.query.filter_by(machineid=machineid, location=location).first()
+        #curuser = request.json["curuser"]
+        #status.curuser = curuser
+        if request.json["curuser"] == status.curuser:
+            code = 400
+            result = {"code": code, "message": "Duplicate Userid"}
+        else:
+            prevuser = status.curuser
+            status.prevuser = prevuser
+            status.unlockcode = uuid.uuid1()
+            status.curuser = request.json["curuser"]  
+
+    else:
+        code = 400
+        result = {"code": code, "message": "No such Machine"}
+    try:
+        db.session.commit()
+    except:
+        code = 500
+        result = {"code": code, "message": "Error Updating Data"}
+
+    if code == 200:
+        result = status.json()
+    send_status(result)
+    return str(result), code
+
+
 @app.route("/createMachine", methods=['POST'])
 def create_machine():
     machineid = request.args.get('machineid')
@@ -148,6 +173,38 @@ def create_machine():
     except:
         code = 500
         result = {"code": code, "message": "Error Updating Data"}
+    if code == 200:
+        result = status.json()
+    send_status(result)
+    return str(result), code
+
+
+
+
+
+@app.route("/updateMachineToInUse", methods=['PUT'])
+def update_machine_In_Use():
+    machineid = request.args.get('machineid')
+    location = request.args.get('location')
+    code = 200
+    result = {}
+    if(Status.query.filter_by(machineid=machineid, location=location).first()):
+        status = Status.query.filter_by(
+            machineid=machineid, location=location).first()
+        
+    
+        status.statuscodeid = 1
+        
+
+    else:
+        code = 400
+        result = {"code": code, "message": "No such Data"}
+    try:
+        db.session.commit()
+    except:
+        code = 500
+        result = {"code": code, "message": "Error Updating Data"}
+
     if code == 200:
         result = status.json()
     send_status(result)
