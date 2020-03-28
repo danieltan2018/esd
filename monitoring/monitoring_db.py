@@ -14,7 +14,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 CORS(app)
 
-
 class Monitoring(db.Model):
     tablename = 'monitoring'
 
@@ -44,10 +43,27 @@ if not database_exists(engine.url):
 db.create_all()
 db.session.commit()
 
-
+# Return all the monitoring information 
 @app.route("/monitoring")
 def get_all():
     return {'monitoring': [monitoring.json() for monitoring in Monitoring.query.all()]}
+
+# Log machine statuses 
+@app.route("/monitoring/add",methods=['POST'])
+def insert_log():
+    code = 200
+    result = {}
+    data = request.get_json()
+    log = log(**data)
+    try:
+        db.session.add(status)
+        db.session.commit()
+    except:
+        code = 500
+        result = {"code": code, "message": "Error Updating Data"}
+    if code == 200:
+        result = log.json()
+    return str(result), code
 
 
 if __name__ == '__main__':
