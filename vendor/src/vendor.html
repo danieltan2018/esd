@@ -43,30 +43,21 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-</head>
 
-    <!-- Navigation Bar  -->
-<body>
-  
-  <nav class="navbar navbar-expand-sm bg-light navbar-light">
-    <ul class="navbar-nav">
-      <li class="nav-item active">
-        <a class="nav-link" href="vendor.html"><h2>Dashboard</h2></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="monitoring.html"><h2>Monitoring</h1></a>
-      </li>
-    </ul>
+        <nav class="navbar navbar-expand-sm bg-light">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+            <a class="nav-link" href="vendor.html">Dashboard</a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" href="monitoring.html">Monitoring</a>
+            </li>
+        </ul>
+        </nav>
 
-    <ul class="navbar-nav ml-auto">
-        <li class="nav-item">
-            <a class="nav-link" onclick="signOut()"><h2>Logout</h1></a>
-          </li>
-    </ul>
+    <br>
 
-  </nav>
-
-    
+    </head>
 
     <body>
         
@@ -85,14 +76,14 @@
           </script> 
           <br><br>
           
-          <!-- <center><button onclick="signOut()" class = "btn btn-danger">Sign Out</button></center> -->
+          <center><button onclick="signOut()" class = "btn btn-danger">Sign Out</button></center>
 
             </script>
 
 <!-- Display table  -->
 <!-- Broken Machines -->
 
-<div id="main-container1" class="container">
+<div class="container">
     <h1 class="display-4">Broken Machines</h1>
     <table id="broken_machine_table" class='table table-striped' border='1'>
     <thead class='thead-dark'>
@@ -108,7 +99,7 @@
 </div>
 
 <!-- All machines -->
-        <div id="main-container2" class="container">
+        <div id="main-container" class="container">
             <h1 class="display-4">Machine Status Listing</h1>
             <table id="status_table" class='table table-striped' border='1'>
                 <thead class='thead-dark'>
@@ -131,15 +122,10 @@
             function showError(message) {
                     // Hide the table and button in the event of error
                     $('#status_table').hide();
-
-                    $('#broken_machine_table').hide();
             
                     // Display an error under the main container
-                    $('#main-container1')
+                    $('#main-container')
                         .append("<label>"+message+"</label>");
-
-                    $('#main-container2')
-                    .append("<label>"+message+"</label>");
     }
 
             // Copy pasta to retrieve information
@@ -220,7 +206,7 @@
         
     function signOut()
     {
-        alert("You have successfully logged out");
+        alert("You have successfully signed out");
         window.location.replace("index.html");
     }
     
@@ -260,6 +246,15 @@
             location.reload();
         }
 
+        // $.ajax({
+        //             url: put_url,    //Your api url
+        //             type: 'PUT',   //type is any HTTP method
+        //             data: payload,    //Data as js object
+        //             success: function () {
+        //                 location.reload()
+        //             }
+        //         })
+        //         ;
 
     </script>
     </script>
