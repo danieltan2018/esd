@@ -27,7 +27,7 @@ class LaundQueue(db.Model):
     machine_id = db.Column(db.Integer, nullable=True)
     status_code = db.Column(db.Integer, nullable = True)
     service_type = db.Column(db.String(64), nullable = True)
-    date_time = db.Column(db.DateTime, nullable =False)
+    date_time = db.Column(db.String(100), nullable =True)
  
     def __init__(self, queue_id, user_id, machine_id, location, service_type, date_time, status_code):
         self.queue_id = queue_id
@@ -53,25 +53,20 @@ db.session.commit()
 
 
 
-@app.route("/newqueue/<string:user_id>&<string:location>&<string:wash_type>")
-def insert_queue(user_id, location, wash_type):
-    date_time = datetime.datetime.now()
+@app.route("/newqueue", methods=['POST'])
+def insert_queue():
     code = 200
-    result ={}
-    new_queue_length = 0
-    laundqueue = {
-        "user_id": user_id,
-        "location": location,
-        "wash_type": wash_type,
-        "date_time":date_time,
-    }
+    result = {}
+    data = request.get_json()
+    print(data)
+    laundqueue = LaundQueue(**data)
+    print(laundqueue)
     try:
         db.session.add(laundqueue)
         db.session.commit()
-        new_queue_length+= LaundQueue.query.filter_by(location=location).count()
     except:
         code = 500
-        result = {"code": code,"message": "Error Updating Data"}
+        result = {"code": code, "message": "Error Updating Data"}
     if code == 200:
         result = laundqueue.json()
     return str(result), code
