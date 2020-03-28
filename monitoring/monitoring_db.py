@@ -54,9 +54,28 @@ def insert_log():
     code = 200
     result = {}
     data = request.get_json()
-    log = log(**data)
+    machineid = request.json["machineid"]
+    location = request.json["location"]
+    statuscodeid = request.json["statuscodeid"]
+    errcodeid = request.json["errcodeid"]
+    if request.json["payment"] == None:
+        payment = 0
+    else:
+        payment =1
+
+    date_time = datetime.datetime.now()
+
+    payload = {
+        "machineid": machineid,
+        "location": location,
+        "statuscodeid": statuscodeid,
+        "errcodeid": errcodeid,
+        "payment": payment,
+        "date_time": date_time
+    }   
+
     try:
-        db.session.add(status)
+        db.session.add(payload)
         db.session.commit()
     except:
         code = 500
