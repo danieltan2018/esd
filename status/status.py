@@ -75,23 +75,39 @@ def find_by_machineid():
 @app.route("/getUnlockCode")
 def find_unlock_code():
     unlockcode = request.args.get('unlockcode')
-    status = Status.query.filter_by(unlockcode=unlockcode).first()
+    machineid = request.args.get('machineid')
+    location = request.args.get('location')
+    status = Status.query.filter_by(location=location, machineid= machineid,unlockcode=unlockcode).first()
     
     if status:
         status_info =status.json()
-        return jsonify({"userid": status_info['prevuser'], "unlockcode": status_info['unlockcode'], "machineid": status_info['machineid'] })
+        return jsonify({"userid": status_info['prevuser']})
     return jsonify({"message": "Unlock Code Invalid."}), 404
 
 
 @app.route("/getStartCode")
 def find_start_code():
     startcode = request.args.get('startcode')
-    status = Status.query.filter_by(startcode=startcode).first()
+    machineid = request.args.get('machineid')
+    location = request.args.get('location')
+    status = Status.query.filter_by(location=location, machineid=machineid, startcode=startcode).first()
     
     if status:
         status_info =status.json()
-        return jsonify({"userid": status_info['curuser'], "startcode": status_info['startcode'], "machineid": status_info['machineid'] })
+        return jsonify({"userid": status_info['curuser']})
     return jsonify({"message": "Start Code Invalid."}), 404
+
+
+@app.route("/getQRCode")
+def find_QR_code():
+    machineid = request.args.get('machineid')
+    location = request.args.get('location')
+    status = Status.query.filter_by(location=location, machineid=machineid).first()
+    
+    if status:
+        status_info =status.json()
+        return jsonify({"unlockcode": status_info['unlockcode'], "startcode":status_info['startcode']})
+    return jsonify({"message": "No Code valid."}), 404
 
 
 @app.route("/findLocation")
