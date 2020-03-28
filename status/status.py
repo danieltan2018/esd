@@ -48,30 +48,33 @@ db.create_all()
 db.session.commit()
 
 
-@app.route("/status")
+@app.route("/")
 def get_available():
     return jsonify({"status": [status.json() for status in Status.query.all()]})
 
 
-@app.route("/status/<string:location>&<int:statuscodeid>")
-def find_by_location(location, statuscodeid):
-    status = Status.query.filter_by(
-        location=location, statuscodeid=statuscodeid).all()
+@app.route("/findAvailMachine")
+def find_by_location():
+    location = request.args.get('location')
+    statuscodeid = request.args.get('statuscodeid')
+    status = Status.query.filter_by(location=location, statuscodeid=statuscodeid).all()
     if status:
         return jsonify({"machineid": [status.json()for status in Status.query.filter_by(location=location, statuscodeid=statuscodeid).all()]})
     return jsonify({"message": "Location not found."}), 404
 
 
-@app.route("/status/<int:machineid>")
-def find_by_machineid(machineid):
+@app.route("/findMachine")
+def find_by_machineid():
+    machineid = request.args.get('machineid')
     status = Status.query.filter_by(machineid=machineid).all()
     if status:
         return jsonify({"machineid": [status.json()for status in Status.query.filter_by(machineid=machineid).all()]})
     return jsonify({"message": "Machine not found."}), 404
 
 
-@app.route("/status/<string:location>")
-def get_location(location):
+@app.route("/findLocation")
+def get_location():
+    location = request.args.get('location')
     return_location = []
     for status in Status.query.all():
         status_container = status.json()
@@ -80,8 +83,10 @@ def get_location(location):
     return jsonify({"Location": return_location})
 
 
-@app.route("/status/<int:machineid>&<string:location>", methods=['PUT'])
-def update_machine(machineid, location):
+@app.route("/updateMachine", methods=['PUT'])
+def update_machine():
+    machineid = request.args.get('machineid')
+    location = request.args.get('location')
     code = 200
     result = {}
     if(Status.query.filter_by(machineid=machineid, location=location).first()):
@@ -126,8 +131,10 @@ def update_machine(machineid, location):
     return str(result), code
 
 
-@app.route("/status/<int:machineid>&<string:location>", methods=['POST'])
-def create_machine(machineid, location):
+@app.route("/createMachine", methods=['POST'])
+def create_machine():
+    machineid = request.args.get('machineid')
+    location = request.args.get('location')
     code = 200
     result = {}
     if (Status.query.filter_by(machineid=machineid, location=location).first()):
