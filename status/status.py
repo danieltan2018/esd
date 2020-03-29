@@ -214,12 +214,6 @@ def update_machine_User():
                 status.prevuser = prevuser
                 status.unlockcode = prevusercode
                          
-                  
-                
-        
-                 
-            
-
     else:
         code = 400
         result = {"code": code, "message": "No such Machine"}
