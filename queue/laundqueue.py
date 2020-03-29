@@ -126,6 +126,14 @@ def next_user():
         return jsonify({"user_id": next_user, "queue_id":queue_id})
     return jsonify({"message": "No user in the queue"}), 404
 
+#Return wash type
+@app.route("/washtype")
+def get_wash_type():
+    user_id = request.args.get('user_id')
+    laundqueue = LaundQueue.query.filter_by(user_id = user_id).first()
+    wash_type = laundqueue.json()["service_type"]
+    return jsonify({"wash type": wash_type})
+
 
 #Return wash type, duration, cost
 # Dequeue
