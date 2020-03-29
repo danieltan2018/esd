@@ -4,8 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
 import json
-from datetime import date
-import datetime
+from datetime import datetime
 
 app = Flask(__name__)
 dbURL = 'mysql+mysqlconnector://root@localhost:3306/monitoring'
@@ -24,7 +23,7 @@ class Monitoring(db.Model):
     statuscodeid = db.Column(db.Integer, nullable=False)
     errcodeid = db.Column(db.Integer, nullable=False)
     payment = db.Column(db.Integer, nullable=False)
-    date_time = db.Column(db.String(100), nullable =False)
+    date_time = db.Column(db.String(100), nullable =True)
 
     def init(self, m_id, machineid, location, statuscodeid, errcodeid, payment, date_time):
         self.m_id = m_id
@@ -54,16 +53,17 @@ def get_all():
 # AMQP
 channelqueue = channel.queue_declare(queue="status", durable=True)
 queue_name = channelqueue.method.queue
-channel.queue_bind(exchange=exchangename,
-                    queue=queue_name, routing_key='#')
-channel.basic_consume(
-    queue=queue_name, on_message_callback=insert_log, auto_ack=True)
+channel.queue_bind(exchange=exchangename,queue=queue_name, routing_key='#')
+channel.basic_consume(queue=queue_name, on_message_callback=insert_log, auto_ack=True)
 channel.start_consuming()
 
 def insert_log():
     code = 200
     result = {}
-    data = request.get_json()
+    location = request.args.get('location')
+    machineid = request.args.get('machineid')
+    now = datetime.now()
+    data = {"m_id":None, "machine_id": machine_id, "location": location, "statuscodeid": statuscodeid, "errorcodeid": errorcodeid, "payment": payment, "date_time": now}
     monitoring = Monitoring(**data)
     print(monitoring)
     try:
