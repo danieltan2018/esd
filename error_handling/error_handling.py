@@ -29,7 +29,7 @@ def callback(channel, method, properties, body): # required signature for the ca
     print()
 
 def processError(order):
-    print("Recording an error:")
+    print("Recording an error:")    
     print(order)
 
 def sendMessage(order):
@@ -39,8 +39,9 @@ def sendMessage(order):
         data={"from": "DeLaundro <do_not_reply@delaundro.me>",
               "to": ["admin@delaundro.me"],
               "subject": "Machine Error",
-              "text": "Error: ".order." observed, please fix asap",
+              "text": "Error: "+ order +" observed, please fix asap",
               "o:tracking": False})
 
 if __name__ == "__main__":  # execute this program only if it is run as a script (not by 'import')
     print("This is " + os.path.basename(__file__) + ": recording an error...")
+    
