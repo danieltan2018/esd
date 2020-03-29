@@ -8,16 +8,8 @@ import json
 import requests
 
 #Store locations into an array
-locations = ["Novena","Balestier","Bukit Panjang"]
+locations = ["Novena","Balestier","Bukit%Panjang"]
 
-#Function to send message 
-def create(payload,URL):
-    sendURL = "http://127.0.0.1:8002/createMachine"
-    # sendURL = "http://status.delaundro.me:8002/createMachine/" + str(URL)
-    print(payload)
-    print(sendURL)
-    r = requests.post(sendURL,json=payload)
-    # print(r.text)
 
 # def update(payload,URL):
 #     sendURL = "http://status.delaundro.me:8002/" + str(URL)
@@ -38,44 +30,89 @@ if user_command == "turn on all":
 
     for location in locations:
         for i in range(1,7):
-            #generate JSON message
-            payload = {
-                "machineid": i,
-                "curuser": 1,
-                "errcodeid": 1,
-                "location": location,
-                "prevuser": 1,
-                "startcode": "none",
-                "statuscodeid": 0,
-                "unlockcode": "none"
-            }
+
+            # Send PUT request 
+            #Function to send message 
+            sendURL = "http://127.0.0.1:8002/createMachine?machineid=" + str(i) + "&location=" + location
+            # sendURL = "http://status.delaundro.me:8002/createMachine/" + str(URL)
+            print(sendURL)
+            r = requests.post(sendURL)
+            # print(r.text)
+
+# Functionality 4: Start a machine with a QR code.
+if user_command == "use machine":
+    
+    # Getting necessary parameters
+    location = input("Where are you now? (If Bukit Panjang, write bukit%panjang) ")
+    machine_id = input("What is your Machine ID? ")
+    qrcode = input("What is your QR Code? ")
+
+    # Calling microservice to get QR code 
+
+    URL = "http://127.0.0.1:8002/getQRCode?machineid=" + machine_id +"&location=" + location 
+
+    # URL = "http://status.delaundro.me:8002/status/qrcode"
+    # print(URL)
+    r = requests.get(URL)
+    # print(r.text)
+    data = r.json()
+    # print(data)
+    unlockcode = data["unlockcode"]
+    startcode = data["startcode"]
+    
+    if unlockcode == qrcode:
+        print("Door open")
+
+    if startcode == qrcode:
+
+        # Change status of machine 
+        change_status_url = "http://127.0.0.1:8002/updateMachineToInUse?machineid=" + machine_id + "&location=" + location
+        x = requests.put(change_status_url)
+
+        # print(change_status_url)
+        # print(x.text)
+
+        # Receive washtype to display 
+        # Get User ID first
+        user_id_url = "http://127.0.0.1:8002/getStartCode?machineid=" + machine_id + "&location=" + location + "&startcode=" + startcode 
+        z = requests.get(user_id_url)
+        # print(change_status_url)
+        # print(z.text)
+        userid_object = z.json()
+        userid = userid_object["userid"]
+        # print(userid)
+
+        # Get washtype from Queue
+        washtype_url = "http://127.0.0.1:5000/washtype?user_id=" + str(userid) 
+        a = requests.get(washtype_url)
+        # print(a.text)
+        washtype_object = a.json()
+        washtype = washtype_object["wash type"]
+
+        print("Your machine has started. Your wash type is: " + washtype)
+
+# #Functionality 2: Populate and turn off all washers 
+
+# if user_command == "turn off all":
+
+#     # Loop all identifiers to involve all machines  
+
+#     for location in locations:
+#         for i in range(1,7):
+#             #generate JSON message
+#             payload = {
+#                 "curuser": 1,
+#                 "errcodeid": 1,
+#                 "location": location,
+#                 "prevuser": 1,
+#                 "startcode": "none",
+#                 "statuscodeid": 1,
+#                 "unlockcode": "none"
+#             }
             
-            #Send JSON message 
-            URL = ""
-            create(payload,URL)
-
-#Functionality 2: Populate and turn off all washers 
-
-if user_command == "turn off all":
-
-    # Loop all identifiers to involve all machines  
-
-    for location in locations:
-        for i in range(1,7):
-            #generate JSON message
-            payload = {
-                "curuser": 1,
-                "errcodeid": 1,
-                "location": location,
-                "prevuser": 1,
-                "startcode": "none",
-                "statuscodeid": 1,
-                "unlockcode": "none"
-            }
-            
-            #Send JSON message 
-            URL = str(i) + "&" + location
-            create(payload,URL)
+#             #Send JSON message 
+#             URL = str(i) + "&" + location
+#             create(payload,URL)
 
 # #Functionality 3: Be able to set certain washers to turn on and off 
 # #Command : modify
@@ -120,33 +157,3 @@ if user_command == "turn off all":
     
 #     update(payload,URL)
     
-# Use a particular machine 
-if user_command == "use machine":
-    
-    # Getting necessary parameters
-    location = input("Where are you now?")
-    machine_id = input("What is your Machine ID?")
-    qrcode = input("What is your QR Code?")
-
-    # Calling microservice
-
-    URL = http://127.0.0.1:8002/
-
-    # URL = "http://status.delaundro.me:8002/status/qrcode"
-
-    r = requests.get(URL)
-    # print(r.text)
-    
-    unlockcode = r.get_json()["unlockcode"]
-    startcode = r.get_json()["startcode"]
-    
-    if unlockcode == qrcode:
-        print("Door open")
-
-    if startcode == qrcode:
-        print("Machine started")
-
-        # Change status of machine 
-        change_status_url = "http://status.delaundro.me:8002/status/changestatus/" + location + "&" + machine_id
-        x = requests.get(change_status_url)
-        # print (x.text)
