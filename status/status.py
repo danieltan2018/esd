@@ -238,8 +238,8 @@ def create_machine():
     if (Status.query.filter_by(machineid=machineid, location=location).first()):
         code = 400
         result = {"code": code, "message": "Machine Already Exist"}
-    data = request.get_json()
-    status = Status(machineid, **data)
+    data = {"machineid":machineid, "location": location, "statuscodeid":1, "curuser": None, "prevuser":None, "errcodeid":0, "unlockcode":None, "startcode":None}
+    status = Status(**data)
     try:
         db.session.add(status)
         db.session.commit()
