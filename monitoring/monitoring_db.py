@@ -5,6 +5,10 @@ from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
 import json
 from datetime import datetime
+import sys
+import os
+import pika
+import threading
 
 app = Flask(__name__)
 dbURL = 'mysql+mysqlconnector://root@localhost:3306/monitoring'
@@ -14,6 +18,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 CORS(app)
 
+
+
+
 class Monitoring(db.Model):
     tablename = 'monitoring'
 
@@ -21,8 +28,8 @@ class Monitoring(db.Model):
     machineid = db.Column(db.Integer, primary_key=True)
     location = db.Column(db.String(100), primary_key=True)
     statuscodeid = db.Column(db.Integer, nullable=False)
-    errcodeid = db.Column(db.Integer, nullable=False)
-    payment = db.Column(db.Integer, nullable=False)
+    errcodeid = db.Column(db.String(100), nullable=False)
+    payment = db.Column(db.Integer, nullable=True)
     date_time = db.Column(db.String(100), nullable =True)
 
     def init(self, m_id, machineid, location, statuscodeid, errcodeid, payment, date_time):
@@ -51,31 +58,55 @@ def get_all():
 # Log machine statuses 
 # @app.route("/monitoring/add",methods=['POST'])
 # AMQP
-channelqueue = channel.queue_declare(queue="status", durable=True)
-queue_name = channelqueue.method.queue
-channel.queue_bind(exchange=exchangename,queue=queue_name, routing_key='#')
-channel.basic_consume(queue=queue_name, on_message_callback=insert_log, auto_ack=True)
-channel.start_consuming()
 
-def insert_log():
-    code = 200
-    result = {}
-    location = request.args.get('location')
-    machineid = request.args.get('machineid')
-    now = datetime.now()
-    data = {"m_id":None, "machine_id": machine_id, "location": location, "statuscodeid": statuscodeid, "errorcodeid": errorcodeid, "payment": payment, "date_time": now}
-    monitoring = Monitoring(**data)
-    print(monitoring)
-    try:
+
+def receiveOrderLog():
+    hostname = "rabbit.delaundro.me"
+    port = 5672
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host=hostname, port=port))
+    channel = connection.channel()
+    exchangename = "laundro_topic"
+    channel.exchange_declare(exchange=exchangename, exchange_type='topic')
+    channelqueue = channel.queue_declare(queue='', exclusive=True)
+    queue_name = channelqueue.method.queue
+    channel.queue_bind(exchange=exchangename,queue=queue_name, routing_key='#')
+    channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
+    channel.start_consuming()
+    
+    
+def callback(channel, method, properties, body): # required signature for the callback; no return
+    print("Received an order log by " + __file__)
+    processOrderLog(json.loads(body))
+    print() # print a new line feed
+
+def processOrderLog(order):
+    print("Recording an order log:")
+    print(order,"here")
+    insert_log(order)
+
+
+def insert_log(order):
+   code = 200
+   result = {}
+   location = order['location']
+   machineid = order['machineid']
+   statuscodeid = order['statuscodeid']
+   errcodeid = order['errcodeid']
+   now = datetime.now()
+   data = {"m_id":None, "machineid": machineid, "location": location, "statuscodeid": statuscodeid, "errcodeid": errcodeid, "payment": None, "date_time": now}
+   monitoring = Monitoring(**data)
+   try:
         db.session.add(monitoring)
         db.session.commit()
-    except:
-        code = 500
-        result = {"code": code, "message": "Error Updating Data"}
-    if code == 200:
-        result = monitoring.json()
-    return str(result), code
+   except:
+       code = 500
+       result = {"code": code, "message": "Error Updating Data"}
+   
 
 
 if __name__ == '__main__':
+    thread = threading.Thread(target=receiveOrderLog(), daemon=True)
+    thread.start()
     app.run(port=8003, debug=True)
+    print("This is " + os.path.basename(__file__) + ": monitoring order creation...")
+
