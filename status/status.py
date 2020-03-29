@@ -8,7 +8,7 @@ import pika
 import uuid
 
 app = Flask(__name__)
-dbURL = 'mysql+mysqlconnector://root@db:3306/status'
+dbURL = 'mysql+mysqlconnector://root@localhost:3306/status'
 app.config['SQLALCHEMY_DATABASE_URI'] = dbURL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -238,8 +238,8 @@ def create_machine():
     if (Status.query.filter_by(machineid=machineid, location=location).first()):
         code = 400
         result = {"code": code, "message": "Machine Already Exist"}
-    data = request.get_json()
-    status = Status(machineid, **data)
+    data = {"machineid":machineid, "location": location, "statuscodeid":1, "curuser": None, "prevuser":None, "errcodeid":0, "unlockcode":None, "startcode":None}
+    status = Status(**data)
     try:
         db.session.add(status)
         db.session.commit()
