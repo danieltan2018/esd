@@ -8,7 +8,7 @@ import pika
 import uuid
 
 app = Flask(__name__)
-dbURL = 'mysql+mysqlconnector://root@localhost:3306/status'
+dbURL = 'mysql+mysqlconnector://root@db:3306/status'
 app.config['SQLALCHEMY_DATABASE_URI'] = dbURL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
