@@ -9,7 +9,7 @@ import requests
 from urllib.request import urlretrieve
 from datetime import datetime
 
-statusURL = "http://127.0.0.1:8002/status"
+statusURL = "http://127.0.0.1:8002/"
 
 app = Flask(__name__)
 dbURL = 'mysql+mysqlconnector://root@localhost:3306/queue'
@@ -83,13 +83,16 @@ def insert_queue():
 @app.route("/calculateWaitTime")
 def calculate_wait_time():
     location = request.args.get('location')
-    queryURL = statusURL
-    machines = int(requests.get(queryURL).text)
+    queryURL = "http://127.0.0.1:8002/countMachine?location="+location
+    print(type(queryURL))
+    machines = requests.get(queryURL).json()
+    noMachines= int(machines['availandunavail'])
+    print(noMachines)
     wait_time = 0
     if(LaundQueue.query.filter_by(location=location).first()):
         queue_length = LaundQueue.query.filter_by(location=location).count()
-        wait_time += (45*queue_length)/machines
-    return wait_time
+        wait_time += (45*queue_length)/noMachines
+    return str(wait_time)
 
 # # Request available machine by location 
 # @app.route("/queue/<string:location>")
