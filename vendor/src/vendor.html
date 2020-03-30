@@ -149,15 +149,15 @@
                 // Change serviceURL to your own
                 // var serviceURL = "http://127.0.0.1:8002/";
 
-
-                var serviceURL = "http://status.delaundro.me/"
+                var serviceURL = "http://status.delaundro.me/";
         
                 try {
                     const response = await fetch(
                     serviceURL, { 
                         headers: { "content-type": "application/json" },
-                        mode: 'no-cors', // allow cross-origin resource sharing
-                        method: 'GET' }
+                        // mode: 'no-cors', // allow cross-origin resource sharing
+                        // method: 'GET' ]
+                        }
                     );
                     const data = await response.json();
                     var status = data.status; //the arr is in data.status of the JSON data
@@ -243,17 +243,24 @@
    function resolve(machineid,location){
         console.log(machineid);
         console.log(location);
-        var put_url = "http://127.0.0.1:8002/updateMachineError?machineid=" + machineid + "&location=" + location;
-        sendData(put_url);
+        // var put_url = "http://127.0.0.1:8002/updateMachineError?machineid=" + machineid + "&location=" + location;
+        var put_url = "http://status.delaundro.me/updateMachineError?machineid=" + machineid + "&location=" + location;
+
+        var payload = {
+            "errcodeid": 0
+        };
+
+        sendData(put_url,payload);
    }
         // console.log(payload);
         // console.log(typeof(payload));
 
-    async function sendData(put_url){
+    async function sendData(put_url,payload){
         let requestParam = {
             headers: { "content-type": "application/json" },
             mode: 'cors', // allow cross-origin resource sharing
-            method: 'PUT'
+            method: 'PUT',
+            body: JSON.stringify(payload)
         }
         try {
             const response = await fetch(put_url, requestParam);
