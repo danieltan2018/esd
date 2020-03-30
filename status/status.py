@@ -157,8 +157,6 @@ def update_machine_Error():
             status.statuscodeid = 2
         else:
             status.statuscodeid = 0
-
-
     else:
         code = 400
         result = {"code": code, "message": "No such Data"}
@@ -210,10 +208,12 @@ def update_machine_User():
                 status.curuser = request.json["curuser"]
                 startcode = uuid.uuid4()
                 status.startcode = startcode.hex
+                status.statuscodeid = 1
             elif status.curuser != None:
                 prevuser = status.curuser
                 prevusercode = status.startcode
                 status.curuser = request.json["curuser"]
+                status.statuscodeid = 1
                 startcode = uuid.uuid4()
                 status.startcode = startcode.hex
                 status.prevuser = prevuser
