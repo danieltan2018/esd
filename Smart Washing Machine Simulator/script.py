@@ -33,8 +33,8 @@ if user_command == "turn on all":
 
             # Send PUT request 
             #Function to send message 
-            sendURL = "http://127.0.0.1:8002/createMachine?machineid=" + str(i) + "&location=" + location
-            # sendURL = "http://status.delaundro.me:8002/createMachine/" + str(URL)
+            # sendURL = "http://127.0.0.1:8002/createMachine?machineid=" + str(i) + "&location=" + location
+            sendURL = "http://status.delaundro.me:8002/createMachine/" + str(i) + "&location=" + location
             print(sendURL)
             r = requests.post(sendURL)
             # print(r.text)
@@ -49,9 +49,8 @@ if user_command == "use machine":
 
     # Calling microservice to get QR code 
 
-    URL = "http://127.0.0.1:8002/getQRCode?machineid=" + machine_id +"&location=" + location 
-
-    # URL = "http://status.delaundro.me:8002/status/qrcode"
+    # URL = "http://127.0.0.1:8002/getQRCode?machineid=" + machine_id +"&location=" + location 
+    URL = "http://status.delaundro.me:8002/getQRCode?machineid=" + machine_id +"&location=" + location
     # print(URL)
     r = requests.get(URL)
     # print(r.text)
@@ -66,7 +65,8 @@ if user_command == "use machine":
     if startcode == qrcode:
 
         # Change status of machine 
-        change_status_url = "http://127.0.0.1:8002/updateMachineToInUse?machineid=" + machine_id + "&location=" + location
+        # change_status_url = "http://127.0.0.1:8002/updateMachineToInUse?machineid=" + machine_id + "&location=" + location
+        change_status_url = "http://status.delaundro.me:8002/updateMachineToInUse?machineid=" + machine_id + "&location=" + location        
         x = requests.put(change_status_url)
 
         # print(change_status_url)
@@ -74,7 +74,8 @@ if user_command == "use machine":
 
         # Receive washtype to display 
         # Get User ID first
-        user_id_url = "http://127.0.0.1:8002/getStartCode?machineid=" + machine_id + "&location=" + location + "&startcode=" + startcode 
+        # user_id_url = "http://127.0.0.1:8002/getStartCode?machineid=" + machine_id + "&location=" + location + "&startcode=" + startcode 
+        user_id_url = "http://status.delaundro.me/getStartCode?machineid=" + machine_id + "&location=" + location + "&startcode=" + startcode
         z = requests.get(user_id_url)
         # print(change_status_url)
         # print(z.text)
@@ -83,7 +84,8 @@ if user_command == "use machine":
         # print(userid)
 
         # Get washtype from Queue
-        washtype_url = "http://127.0.0.1:5000/washtype?user_id=" + str(userid) 
+        # washtype_url = "http://127.0.0.1:5000/washtype?user_id=" + str(userid)
+        washtype_url = "http://status.delaundro.me/washtype?user_id=" + str(userid)  
         a = requests.get(washtype_url)
         # print(a.text)
         washtype_object = a.json()
