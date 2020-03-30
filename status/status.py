@@ -8,6 +8,7 @@ import pika
 import uuid
 
 app = Flask(__name__)
+# dbURL = 'mysql+mysqlconnector://root@localhost:3306/status'
 dbURL = 'mysql+mysqlconnector://root@db:3306/status'
 app.config['SQLALCHEMY_DATABASE_URI'] = dbURL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -325,3 +326,4 @@ def send_status(status):
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8002, threaded=True)
+    # app.run(port=8002, threaded=True)

@@ -147,12 +147,17 @@
             // - using await requires the function that calls it to be async
             $(async() => {           
                 // Change serviceURL to your own
-                var serviceURL = "http://127.0.0.1:8002/status";
+                // var serviceURL = "http://127.0.0.1:8002/";
+
+
+                var serviceURL = "http://status.delaundro.me/"
         
                 try {
-                    const response =
-                    await fetch(
-                    serviceURL, { method: 'GET' }
+                    const response = await fetch(
+                    serviceURL, { 
+                        headers: { "content-type": "application/json" },
+                        mode: 'no-cors', // allow cross-origin resource sharing
+                        method: 'GET' }
                     );
                     const data = await response.json();
                     var status = data.status; //the arr is in data.status of the JSON data
@@ -164,11 +169,17 @@
                         // for loop to setup all table rows with obtained status data
                         var rows = "";
                         for (const state of status) {
+                            // Extra parameter to check for bukit panjang because they are two words
+                            if (state.location =="Bukit%Panjang"){
+                                var location = "Bukit Panjang";
+                            } else{
+                                var location = state.location;
+                            }
                             
                             eachRow =
                                 "<td>" + state.curuser + "</td>" +
                                 "<td>" + state.errcodeid + "</td>" +
-                                "<td>" + state.location + "</td>" +
+                                "<td>" + location + "</td>" +
                                 "<td>" + state.machineid + "</td>"+
                                 "<td>" + state.prevuser + "</td>" +
                                 "<td>" + state.startcode + "</td>" +
@@ -185,9 +196,14 @@
                         var rows = "";
                         for (const state of status) {
                             if(state.statuscodeid==2){
+                                if (state.location =="Bukit%Panjang"){
+                                var location = "Bukit Panjang";
+                                } else{
+                                var location = state.location;
+                                }
                                 eachRow =
                                     "<td>" + state.errcodeid + "</td>" +
-                                    "<td>" + state.location + "</td>" +
+                                    "<td>" + location + "</td>" +
                                     "<td>" + state.machineid + "</td>"+
                                     "<td>" + state.statuscodeid + "</td>"+
                                     "<td><button onclick=resolve("+state.machineid+ ",'"+state.location + "')> Resolve </button></td>";
@@ -227,28 +243,17 @@
    function resolve(machineid,location){
         console.log(machineid);
         console.log(location);
-        var put_url = "http://127.0.0.1:8002/status/" + machineid + "&" + location;
-        var payload = {
-            "curuser": 0,
-            "errcodeid": 1,
-            "location": location,
-            "machine_id":machineid,
-            "prevuser": 1,
-            "startcode": "none",
-            "statuscodeid": 0,
-            "unlockcode": "none" 
-        };
-        sendData(put_url, payload);
+        var put_url = "http://127.0.0.1:8002/updateMachineError?machineid=" + machineid + "&location=" + location;
+        sendData(put_url);
    }
         // console.log(payload);
         // console.log(typeof(payload));
 
-    async function sendData(put_url,payload){
+    async function sendData(put_url){
         let requestParam = {
             headers: { "content-type": "application/json" },
             mode: 'cors', // allow cross-origin resource sharing
-            method: 'PUT',
-            body: JSON.stringify(payload)
+            method: 'PUT'
         }
         try {
             const response = await fetch(put_url, requestParam);
@@ -261,6 +266,5 @@
         }
 
 
-    </script>
     </script>
 </html>
