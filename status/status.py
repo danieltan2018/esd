@@ -153,7 +153,10 @@ def update_machine_Error():
         
         errcodeid = request.json["errcodeid"]
         status.errcodeid = errcodeid
-        status.statuscodeid = 2
+        if errcodeid != 0:
+            status.statuscodeid = 2
+        else:
+            status.statuscodeid = 0
 
 
     else:
