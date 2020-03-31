@@ -123,11 +123,15 @@ def laundqueue_list():
 def next_user():
     location = request.args.get('location')
     laundqueue = LaundQueue.query.filter_by(location=location).first()
-    next_user = laundqueue.json()["user_id"]
-    queue_id = laundqueue.json()["queue_id"]
-    if next_user:   
-        return jsonify({"user_id": next_user, "queue_id":queue_id})
-    return jsonify({"message": "No user in the queue"}), 404
+    if laundqueue == None:
+        return jsonify({"message": "not found in the queue"}), 404
+    else:
+        laundqueue = LaundQueue.query.filter_by(location=location).first()
+        next_user = laundqueue.json()["user_id"]
+        queue_id = laundqueue.json()["queue_id"]
+        if next_user:   
+            return jsonify({"user_id": next_user, "queue_id":queue_id})
+        return jsonify({"message": "No user in the queue"}), 404
 
 #Return wash type
 @app.route("/washtype")
@@ -135,7 +139,38 @@ def get_wash_type():
     user_id = request.args.get('user_id')
     laundqueue = LaundQueue.query.filter_by(user_id = user_id).first()
     wash_type = laundqueue.json()["service_type"]
+    if wash_type == None:
+        return jsonify({"wash type": "Wash Type not indicated yet"})
     return jsonify({"wash type": wash_type})
+
+
+#Insert MachineID and and Washtype to Queue 
+@app.route("/allocateMachine", methods=['PUT'])
+def alloc_Machine():
+    user_id = request.args.get('user_id')
+    queue_id = request.args.get('queue_id')
+    code = 200
+    result = {}
+    laundqueue = LaundQueue.query.filter_by(user_id = user_id, queue_id = queue_id).first()
+    if laundqueue:
+        wash_type = request.json["wash_type"]
+        laundqueue.wash_type = wash_type
+        machine_id = request.json['machine_id']
+        laundqueue.machine_id = machine_id
+    else:
+        code = 400
+        result = {"code": code, "message": "No such Data"}
+    try:
+        db.session.commit()
+    except:
+        code = 500
+        result = {"code": code, "message": "Error Updating Data"}
+
+    if code == 200:
+        result = laundqueue.json()
+    return result
+    
+        
 
 
 #Return wash type, duration, cost
