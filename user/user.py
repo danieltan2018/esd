@@ -71,6 +71,21 @@ def startamqp():
 def amqpcallback(channel, method, properties, body):
     status = json.loads(body)
     statuscode = status['statuscodeid']
+    id = status['curuser']
+    if statuscode == 1:
+        bot.send_message(
+            chat_id=id, text="*Your wash has started!*\nWe will notify you when it's done.", parse_mode=telegram.ParseMode.MARKDOWN)
+    elif statuscode == 0:
+        bot.send_message(
+            chat_id=id, text="*Wash Complete!*\nPlease collect your laundry within 15 minutes.", parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.send_message(
+            chat_id=id, text="Thank you for choosing DE'Laundro. To start another wash, [click here](https://t.me/delaundrobot?start=delaundro).", parse_mode=telegram.ParseMode.MARKDOWN)
+        location = status['location']
+        machine_id = status['machineid']
+        params = {'location': location}
+        url = QUEUEURL + 'nextuser'
+        nextuser = requests.get(url=url, params=params)
+        newwash(nextuser, location, machine_id)
 
 
 @run_async
@@ -187,7 +202,7 @@ def joinqueue(update, context):
             machine_id = machines.json()['machineid'][0]['machineid']
             context.bot.answer_callback_query(
                 query.id, text="There is no queue. You will be assigned the first available machine.", show_alert=True)
-            newwash(chat_id, machine_id)
+            newwash(chat_id, data, machine_id)
             msg = "It's your turn!"
             queue = False
         else:
@@ -232,7 +247,7 @@ def cancelqueue(update, context):
 
 
 @run_async
-def newwash(user_id, machine_id):
+def newwash(user_id, location, machine_id):
     pass
 
 
