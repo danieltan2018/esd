@@ -4,3 +4,4 @@ flask_sqlalchemy
 sqlalchemy_utils
 mysql-connector-python
 pika
+requests
