@@ -90,8 +90,8 @@ def laundqueue_list():
     laundqueue = LaundQueue.query.filter_by(
         location=location).all()
     if laundqueue:
-        return jsonify({location + " queue": [laundqueue.json()for laundqueue
-                                              in LaundQueue.query.filter_by(location=location).all()]})
+        return jsonify({"queue": [laundqueue.json()for laundqueue
+                                  in LaundQueue.query.filter_by(location=location).all()]})
     return jsonify({"message": "There is no queue in this location."}), 404
 
 
