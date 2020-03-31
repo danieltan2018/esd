@@ -8,7 +8,6 @@ import pika
 import uuid
 
 app = Flask(__name__)
-# dbURL = 'mysql+mysqlconnector://root@localhost:3306/status'
 dbURL = 'mysql+mysqlconnector://root@db:3306/status'
 app.config['SQLALCHEMY_DATABASE_URI'] = dbURL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -49,6 +48,7 @@ if not database_exists(engine.url):
 db.create_all()
 db.session.commit()
 
+
 @app.route("/")
 def get_available():
     return jsonify({"status": [status.json() for status in Status.query.all()]})
@@ -59,17 +59,18 @@ def count_by_location():
     location = request.args.get('location')
     status_all = Status.query.filter_by(location=location).all()
     totalMachine = len(status_all)
-    status_unavailable = Status.query.filter_by(location=location, errcodeid=0).all()
+    status_unavailable = Status.query.filter_by(
+        location=location, errcodeid=0).all()
     unavailMachine = len(status_unavailable)
-    status_available = Status.query.filter_by(location=location, errcodeid=1).all()
+    status_available = Status.query.filter_by(
+        location=location, errcodeid=1).all()
     availMachine = len(status_available)
     status_down = Status.query.filter_by(location=location, errcodeid=2).all()
     downMachine = len(status_down)
     totallessbroken = (unavailMachine+availMachine)
     if status_all:
-        
-        
-        return jsonify({"locationtotalmachine":totalMachine, "numberofdown":downMachine, "availandunavail":totallessbroken})
+
+        return jsonify({"locationtotalmachine": totalMachine, "numberofdown": downMachine, "availandunavail": totallessbroken})
     return jsonify({"message": "Error Finding Machine."}), 404
 
 
@@ -77,7 +78,8 @@ def count_by_location():
 def find_by_location():
     location = request.args.get('location')
     statuscodeid = request.args.get('statuscodeid')
-    status = Status.query.filter_by(location=location, statuscodeid=statuscodeid).all()
+    status = Status.query.filter_by(
+        location=location, statuscodeid=statuscodeid).all()
     if status:
         return jsonify({"machineid": [status.json()for status in Status.query.filter_by(location=location, statuscodeid=statuscodeid).all()]})
     return jsonify({"message": "Location not found."}), 404
@@ -97,10 +99,11 @@ def find_unlock_code():
     unlockcode = request.args.get('unlockcode')
     machineid = request.args.get('machineid')
     location = request.args.get('location')
-    status = Status.query.filter_by(location=location, machineid= machineid,unlockcode=unlockcode).first()
-    
+    status = Status.query.filter_by(
+        location=location, machineid=machineid, unlockcode=unlockcode).first()
+
     if status:
-        status_info =status.json()
+        status_info = status.json()
         return jsonify({"userid": status_info['prevuser']})
     return jsonify({"message": "Unlock Code Invalid."}), 404
 
@@ -110,10 +113,11 @@ def find_start_code():
     startcode = request.args.get('startcode')
     machineid = request.args.get('machineid')
     location = request.args.get('location')
-    status = Status.query.filter_by(location=location, machineid=machineid, startcode=startcode).first()
-    
+    status = Status.query.filter_by(
+        location=location, machineid=machineid, startcode=startcode).first()
+
     if status:
-        status_info =status.json()
+        status_info = status.json()
         return jsonify({"userid": status_info['curuser']})
     return jsonify({"message": "Start Code Invalid."}), 404
 
@@ -122,11 +126,12 @@ def find_start_code():
 def find_QR_code():
     machineid = request.args.get('machineid')
     location = request.args.get('location')
-    status = Status.query.filter_by(location=location, machineid=machineid).first()
-    
+    status = Status.query.filter_by(
+        location=location, machineid=machineid).first()
+
     if status:
-        status_info =status.json()
-        return jsonify({"unlockcode": status_info['unlockcode'], "startcode":status_info['startcode']})
+        status_info = status.json()
+        return jsonify({"unlockcode": status_info['unlockcode'], "startcode": status_info['startcode']})
     return jsonify({"message": "No Code valid."}), 404
 
 
@@ -150,7 +155,7 @@ def update_machine_Error():
     if(Status.query.filter_by(machineid=machineid, location=location).first()):
         status = Status.query.filter_by(
             machineid=machineid, location=location).first()
-        
+
         errcodeid = request.json["errcodeid"]
         status.errcodeid = errcodeid
         if errcodeid != 0:
@@ -189,18 +194,19 @@ def update_machine_User():
     code = 200
     result = {}
     if(Status.query.filter_by(machineid=machineid, location=location, errcodeid=0).first()):
-        status = Status.query.filter_by(machineid=machineid, location=location).first()
+        status = Status.query.filter_by(
+            machineid=machineid, location=location).first()
         #curuser = request.json["curuser"]
         #status.curuser = curuser
         if request.json["curuser"] == status.curuser:
             code = 400
             result = {"code": code, "message": "Duplicate Userid"}
         else:
-            #if request.json["curuser"]:
+            # if request.json["curuser"]:
             #    status.curuser = request.json["curuser"]
             #    startcode = uuid.uuid4()
             #    status.startcode = startcode.hex
-            #if status.curuser == None:
+            # if status.curuser == None:
             #    prevuser = status.curuser
             #    status.prevuser = prevuser
             #    status.unlockcode = status.startcode
@@ -218,7 +224,7 @@ def update_machine_User():
                 status.startcode = startcode.hex
                 status.prevuser = prevuser
                 status.unlockcode = prevusercode
-                         
+
     else:
         code = 400
         result = {"code": code, "message": "No such Machine"}
@@ -243,7 +249,8 @@ def create_machine():
     if (Status.query.filter_by(machineid=machineid, location=location).first()):
         code = 400
         result = {"code": code, "message": "Machine Already Exist"}
-    data = {"machineid":machineid, "location": location, "statuscodeid":1, "curuser": None, "prevuser":None, "errcodeid":0, "unlockcode":None, "startcode":None}
+    data = {"machineid": machineid, "location": location, "statuscodeid": 1, "curuser": None,
+            "prevuser": None, "errcodeid": 0, "unlockcode": None, "startcode": None}
     status = Status(**data)
     try:
         db.session.add(status)
@@ -257,9 +264,6 @@ def create_machine():
     return str(result), code
 
 
-
-
-
 @app.route("/updateMachineToInUse", methods=['PUT'])
 def update_machine_In_Use():
     machineid = request.args.get('machineid')
@@ -269,10 +273,8 @@ def update_machine_In_Use():
     if(Status.query.filter_by(machineid=machineid, location=location).first()):
         status = Status.query.filter_by(
             machineid=machineid, location=location).first()
-        
-    
+
         status.statuscodeid = 1
-        
 
     else:
         code = 400
@@ -287,9 +289,6 @@ def update_machine_In_Use():
         result = status.json()
     send_status(result)
     return str(result), code
-
-
-
 
 
 def send_status(status):
@@ -328,5 +327,4 @@ def send_status(status):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8002, threaded=True)
-    # app.run(port=8002, threaded=True)
+    app.run(host='0.0.0.0', port=80, threaded=True)
