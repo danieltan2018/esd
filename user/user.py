@@ -344,6 +344,7 @@ def sendqr(update, context):
         return
     context.bot.send_photo(chat_id=id, photo='https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={}&qzone=20'.format(
         startcode), caption='Scan this QR code at the assigned washing machine to start wash or unlock the door')
+    del pendingusers[id]
     return
 
 
