@@ -54,6 +54,7 @@ channel.exchange_declare(exchange=exchangename, exchange_type='topic')
 WASHTYPES = {"Standard Wash": 5, "Double Wash": 6, "Hot Wash": 7}
 STATUSURL = 'http://status.delaundro.me'
 QUEUEURL = 'http://queue.delaundro.me'
+pendingusers = {}
 
 
 @run_async
@@ -73,20 +74,20 @@ def amqpcallback(channel, method, properties, body):
     statuscode = status['statuscodeid']
     id = status['curuser']
     if statuscode == 1:
-        bot.send_message(
-            chat_id=id, text="*Your wash has started!*\nWe will notify you when it's done.", parse_mode=telegram.ParseMode.MARKDOWN)
+        send(id, "*Your wash has started!*\nWe will notify you when it's done.", [])
     elif statuscode == 0:
-        bot.send_message(
-            chat_id=id, text="*Wash Complete!*\nPlease collect your laundry within 15 minutes.", parse_mode=telegram.ParseMode.MARKDOWN)
-        bot.send_message(
-            chat_id=id, text="Thank you for choosing DE'Laundro. To start another wash, [click here](https://t.me/delaundrobot?start=delaundro).", parse_mode=telegram.ParseMode.MARKDOWN)
+        send(id, "*Wash Complete!*\nPlease collect your laundry within 15 minutes.", [])
+        send(
+            id, "Thank you for choosing DE'Laundro. To start another wash, [click here](https://t.me/delaundrobot?start=delaundro).", [])
         location = status['location']
         machine_id = status['machineid']
         params = {'location': location}
         url = QUEUEURL + 'nextuser'
         nextuser = requests.get(url=url, params=params)
         if nextuser.status_code == 200:
-            newwash(nextuser.text, location, machine_id)
+            nextuser = nextuser.json()
+            newwash(nextuser['user_id'], nextuser['queue_id'],
+                    location, machine_id)
 
 
 @run_async
@@ -101,7 +102,6 @@ def paymentamqp(message):
 
 @run_async
 def send(id, msg, keyboard):
-    bot = telegram.Bot(token=BOTTOKEN)
     keyboard = InlineKeyboardMarkup(keyboard)
     bot.send_message(
         chat_id=id, reply_markup=keyboard, text=msg, parse_mode=telegram.ParseMode.MARKDOWN)
@@ -129,6 +129,8 @@ def callbackquery(update, context):
         joinqueue(update, context)
     elif data == ('CANCELQUEUE'):
         cancelqueue(update, context)
+    elif data.startswith('WASHTYPE='):
+        washseq(update, context)
 
 
 @run_async
@@ -191,6 +193,7 @@ def selectqueue(update, context):
 
 @run_async
 def joinqueue(update, context):
+    # WARNING: nextuser may return the same user for more than one machine
     query = update.callback_query
     data = query.data
     data = data.replace('JOINQUEUE=', '')
@@ -203,7 +206,6 @@ def joinqueue(update, context):
             machine_id = machines.json()['machineid'][0]['machineid']
             context.bot.answer_callback_query(
                 query.id, text="There is no queue. You will be assigned the first available machine.", show_alert=True)
-            newwash(chat_id, data, machine_id)
             msg = "It's your turn!"
             queue = False
         else:
@@ -213,21 +215,29 @@ def joinqueue(update, context):
         context.bot.answer_callback_query(
             query.id, text="Sorry, we are having trouble connecting to our Status system.", show_alert=True)
         return
-    if queue:
-        try:
+    try:
+        params = {'location': data, 'user_id': chat_id}
+        url = QUEUE + 'newqueue'
+        requests.post(url=url, params=params)
+        if queue:
             params = {'location': data}
             url = QUEUE + 'queuelist'
             queuelength = len(requests.get(
                 url=url, params=params).json()['queue'])
-            params = {'location': data, 'user_id': chat_id}
-            url = QUEUE + 'newqueue'
-            requests.post(url=url, params=params)
             context.bot.answer_callback_query(
                 query.id, text="There are {} people ahead of you. We will notify you when it's your turn.".format(queuelength), show_alert=True)
-        except:
-            context.bot.answer_callback_query(
-                query.id, text="Sorry, we are having trouble connecting to our Queue system.", show_alert=True)
-            return
+        else:
+            params = {'location': location}
+            url = QUEUEURL + 'nextuser'
+            nextuser = requests.get(url=url, params=params)
+            if nextuser.status_code == 200:
+                nextuser = nextuser.json()
+                newwash(nextuser['user_id'],
+                        nextuser['queue_id'], location, machine_id)
+    except:
+        context.bot.answer_callback_query(
+            query.id, text="Sorry, we are having trouble connecting to our Queue system.", show_alert=True)
+        return
     context.bot.edit_message_text(
         chat_id=chat_id,
         message_id=query.message.message_id,
@@ -248,8 +258,33 @@ def cancelqueue(update, context):
 
 
 @run_async
-def newwash(user_id, location, machine_id):
-    pass
+def newwash(user_id, queue_id, location, machine_id):
+    try:
+        params = {'location': location,
+                  'machineid': machine_id, 'curuser': user_id}
+        url = STATUSURL + 'updateMachineUser'
+        requests.post(url=url, params=params)
+    except:
+        send(id, "_Sorry, we are having trouble connecting to our Status system._", [])
+        return
+    global pendingusers
+    pendingusers[user_id] = {'queue': queue_id,
+                             'location': location, 'machine': machine_id}
+    msg = "Select a wash type:"
+    keyboard = []
+    for washtype in WASHTYPES:
+        keyboard.append([InlineKeyboardButton(
+            washtype, callback_data='WASHTYPE={}'.format(washtype))])
+    send(id, msg, keyboard)
+    return
+
+
+@run_async
+def washseq(update, context):
+    query = update.callback_query
+    data = query.data
+    data = data.replace('WASHTYPE=', '')
+    chat_id = query.message.chat_id
 
 
 @run_async
