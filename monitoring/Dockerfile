@@ -3,5 +3,5 @@ EXPOSE 80
 WORKDIR /WORKDIR
 COPY requirements.txt /WORKDIR
 RUN pip install -r requirements.txt
-COPY status.py /WORKDIR
+COPY monitoring.py /WORKDIR
 CMD python status.py
