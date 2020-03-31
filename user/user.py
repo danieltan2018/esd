@@ -294,6 +294,8 @@ def dopayment(update, context):
     except:
         send(id, "_Sorry, we are having trouble connecting to our Queue system._", [])
         return
+    context.bot.delete_message(chat_id=id, message_id=query.message.message_id)
+    context.bot.answer_callback_query(query.id)
     price = WASHTYPES[washtype]
     title = "DE'Laundro Payment"
     description = "Bill for {}:".format(washtype)
