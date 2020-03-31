@@ -3,3 +3,4 @@
 *.key
 *.pyc
 .DS_Store
+.env
