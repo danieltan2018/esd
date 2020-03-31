@@ -34,7 +34,7 @@ if user_command == "turn on all":
             # Send PUT request 
             #Function to send message 
             # sendURL = "http://127.0.0.1:8002/createMachine?machineid=" + str(i) + "&location=" + location
-            sendURL = "http://status.delaundro.me:8002/createMachine/" + str(i) + "&location=" + location
+            sendURL = "http://status.delaundro.me/createMachine?machineid=" + str(i) + "&location=" + location
             print(sendURL)
             r = requests.post(sendURL)
             # print(r.text)
@@ -50,7 +50,7 @@ if user_command == "use machine":
     # Calling microservice to get QR code 
 
     # URL = "http://127.0.0.1:8002/getQRCode?machineid=" + machine_id +"&location=" + location 
-    URL = "http://status.delaundro.me:8002/getQRCode?machineid=" + machine_id +"&location=" + location
+    URL = "http://status.delaundro.me/getQRCode?machineid=" + machine_id +"&location=" + location
     # print(URL)
     r = requests.get(URL)
     # print(r.text)
@@ -66,7 +66,7 @@ if user_command == "use machine":
 
         # Change status of machine 
         # change_status_url = "http://127.0.0.1:8002/updateMachineToInUse?machineid=" + machine_id + "&location=" + location
-        change_status_url = "http://status.delaundro.me:8002/updateMachineToInUse?machineid=" + machine_id + "&location=" + location        
+        change_status_url = "http://status.delaundro.me/updateMachineToInUse?machineid=" + machine_id + "&location=" + location        
         x = requests.put(change_status_url)
 
         # print(change_status_url)
