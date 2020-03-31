@@ -9,10 +9,10 @@ import requests
 from urllib.request import urlretrieve
 from datetime import datetime
 
-statusURL = "http://127.0.0.1:8002/"
+statusURL = "http://127.0.0.1:80/"
 
 app = Flask(__name__)
-dbURL = 'mysql+mysqlconnector://root@localhost:3306/queue'
+dbURL = 'mysql+mysqlconnector://root@db:3306/queue'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/queue'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
  
@@ -205,6 +205,6 @@ def service_details():
 
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(host='0.0.0.0', port=80, threaded=True)
     
 
