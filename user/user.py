@@ -85,7 +85,8 @@ def amqpcallback(channel, method, properties, body):
         params = {'location': location}
         url = QUEUEURL + 'nextuser'
         nextuser = requests.get(url=url, params=params)
-        newwash(nextuser, location, machine_id)
+        if nextuser.status_code == 200:
+            newwash(nextuser.text, location, machine_id)
 
 
 @run_async
@@ -163,7 +164,7 @@ def selectqueue(update, context):
     try:
         params = {'location': data}
         url = QUEUEURL + 'calculateWaitTime'
-        waitingtime = requests.get(url=url, params=params)
+        waitingtime = requests.get(url=url, params=params).text
     except:
         context.bot.answer_callback_query(
             query.id, text="Sorry, we are having trouble connecting to our Queue system.", show_alert=True)
