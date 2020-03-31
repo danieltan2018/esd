@@ -70,39 +70,18 @@ def insert_queue():
         result = laundQueue.json()
     return str(result), code
 
-
-# #add new service type
-# @app.route("/queue/<string:user_id>", methods=['POST'])
-# def add_new_service_request(user_id):
-#     user_id = LaundQueue.query.get(user_id)
-#     new_service_request = request.json["service_type"]
-
 # Calculate and return waiting time
 @app.route("/calculateWaitTime")
 def calculate_wait_time():
     location = request.args.get('location')
     queryURL = statusURL+"countMachine?location="+location
-    print(type(queryURL))
     machines = requests.get(queryURL).json()
     noMachines = int(machines['availandunavail'])
-    print(noMachines)
     wait_time = 0
     if(LaundQueue.query.filter_by(location=location).first()):
         queue_length = LaundQueue.query.filter_by(location=location).count()
         wait_time += (45*queue_length)/noMachines
     return str(wait_time)
-
-# # Request available machine by location
-# @app.route("/queue/<string:location>")
-# def get_avail_machine_id(location):
-#     queryURL = statusURL
-#     results = LaundQueue.query.filter_by(location=location).first()
-#     #print("here", results)
-#     if not results:
-#         queryURL = statusURL +"/"+ location + "&0"
-#     return requests.get(queryURL).text
-
-    # return jsonify(r.json())
 
 # Return list of Queues
 @app.route("/queuelist")
