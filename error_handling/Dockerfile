@@ -3,4 +3,4 @@ WORKDIR /WORKDIR
 COPY requirements.txt /WORKDIR
 RUN pip install -r requirements.txt
 COPY error_handling.py /WORKDIR
-CMD python status.py
+CMD python error_handling.py
