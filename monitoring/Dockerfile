@@ -4,4 +4,4 @@ WORKDIR /WORKDIR
 COPY requirements.txt /WORKDIR
 RUN pip install -r requirements.txt
 COPY monitoring.py /WORKDIR
-CMD python status.py
+CMD python monitoring.py
