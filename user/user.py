@@ -130,7 +130,7 @@ def callbackquery(update, context):
     elif data == ('CANCELQUEUE'):
         cancelqueue(update, context)
     elif data.startswith('WASHTYPE='):
-        washseq(update, context)
+        dopayment(update, context)
 
 
 @run_async
@@ -280,18 +280,21 @@ def newwash(user_id, queue_id, location, machine_id):
 
 
 @run_async
-def washseq(update, context):
+def dopayment(update, context):
     query = update.callback_query
     data = query.data
     data = data.replace('WASHTYPE=', '')
-    chat_id = query.message.chat_id
-
-
-@run_async
-def dopayment(update, context):
-    washtype = "Standard Wash"  # for testing
-    price = 5  # for testing
-    id = update.message.chat_id  # for testing
+    washtype = data
+    id = query.message.chat_id
+    try:
+        params = {'user_id': id, 'queue_id': pendingusers[id]['queue'],
+                  'machine_id': machine_id, 'wash_type': washtype}
+        url = QUEUEURL + 'allocateMachine'
+        requests.post(url=url, params=params)
+    except:
+        send(id, "_Sorry, we are having trouble connecting to our Queue system._", [])
+        return
+    price = WASHTYPES[washtype]
     title = "DE'Laundro Payment"
     description = "Bill for {}:".format(washtype)
     payload = "delaundro-pay"
@@ -302,6 +305,7 @@ def dopayment(update, context):
     context.bot.send_invoice(id, title, description, payload,
                              provider_token, start_parameter, currency, prices)
     send(id, '_Stripe Payments running in TEST mode._\n\nUse card number `4000 0070 2000 0003` with any future expiry date and CVV.', [])
+    return
 
 
 @run_async
@@ -311,22 +315,33 @@ def precheckout(update, context):
         query.answer(ok=False, error_message="Something went wrong...")
     else:
         query.answer(ok=True)
+    return
 
 
 @run_async
 def paymentsuccess(update, context):
-    update.message.reply_text("Thank you for your payment!")
     user_id = update.message.chat_id
     paymentdetails = {"payment": user_id}
     paymentamqp(paymentdetails)
+    machine_id = pendingusers[user_id]['machine']
+    send(user_id, "Thank you for your payment! Please proceed to *{}*.".format(machine_id), [])
+    sendqr(update, context)
+    return
 
 
 @run_async
 def sendqr(update, context):
-    id = update.message.chat_id  # for testing
-    unlockcode = 12345  # for testing
+    id = update.message.chat_id
+    try:
+        params = {'location': pendingusers[id]['location'],
+                  'machineid': pendingusers[id]['machine_id']}
+        url = STATUSURL + 'getQRCode'
+        startcode = requests.get(url=url, params=params).json()['startcode']
+    except:
+        send(id, "_Sorry, we are having trouble connecting to our Status system._", [])
+        return
     context.bot.send_photo(chat_id=id, photo='https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={}&qzone=20'.format(
-        unlockcode), caption='Scan this QR code at the assigned washing machine to start wash or unlock the door')
+        startcode), caption='Scan this QR code at the assigned washing machine to start wash or unlock the door')
     return
 
 
@@ -336,10 +351,8 @@ def main():
 
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CallbackQueryHandler(callbackquery))
-    dp.add_handler(CommandHandler("testpay", dopayment))
     dp.add_handler(PreCheckoutQueryHandler(precheckout))
     dp.add_handler(MessageHandler(Filters.successful_payment, paymentsuccess))
-    dp.add_handler(CommandHandler("testqr", sendqr))
 
     startamqp()
     updater.start_webhook(listen='0.0.0.0',
