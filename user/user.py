@@ -165,7 +165,7 @@ def selectqueue(update, context):
     data = data.replace('LOCATION=', '')
     try:
         params = {'location': data}
-        url = QUEUEURL + 'calculateWaitTime'
+        url = QUEUEURL + '/calculateWaitTime'
         waitingtime = requests.get(url=url, params=params).text
     except:
         context.bot.answer_callback_query(
