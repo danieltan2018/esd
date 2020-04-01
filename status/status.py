@@ -247,6 +247,8 @@ def create_machine():
         code = 500
         result = {"code": code, "message": "Error Updating Data"}
     if code == 200:
+        if errcodeid == 0:
+            status.errcodeid = "none"
         result = status.json()
     send_status(result)
     return str(result), code
