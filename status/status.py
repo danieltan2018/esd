@@ -226,16 +226,6 @@ def update_machine_User():
         result = {"code": code, "message": "Error Updating Data"}
 
     if code == 200:
-        if errcodeid == 0:
-            status.errcodeid = "none"
-        elif errcodeid == 1:
-            status.errcodeid = "Low on Detergent"
-        elif errcodeid == 2:
-            status.errcodeid = "Machine is Down"
-        elif errcodeid == 3:
-            status.errcodeid = "Water is Low"
-        else:
-            status.errcodeid = "Error Unknown Call Tier 3 Support"
         result = status.json()
     send_status(result)
     return str(result), code
@@ -320,13 +310,6 @@ def send_status(status):
         channel.queue_bind(exchange=exchangename,
                            queue='errorhandler', routing_key='*.error')
         channel.basic_publish(exchange=exchangename, routing_key="machine.error",
-                              body=message, properties=pika.BasicProperties(delivery_mode=2))
-    else:
-        # inform shipping
-        channel.queue_declare(queue='monitoring', durable=True)
-        channel.queue_bind(exchange=exchangename,
-                           queue='monitoring', routing_key='*.status')
-        channel.basic_publish(exchange=exchangename, routing_key="machine.status",
                               body=message, properties=pika.BasicProperties(delivery_mode=2))
     connection.close()
 
