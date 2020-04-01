@@ -204,8 +204,6 @@ def joinqueue(update, context):
         machines = requests.get(url=url, params=params)
         if machines.status_code == 200:
             machine_id = machines.json()['machineid'][0]['machineid']
-            context.bot.answer_callback_query(
-                query.id, text="There is no queue. You will be assigned the first available machine.", show_alert=True)
             msg = "It's your turn!"
             queue = False
         else:
@@ -219,6 +217,8 @@ def joinqueue(update, context):
         params = {'location': data, 'user_id': chat_id}
         url = QUEUEURL + 'newqueue'
         requests.post(url=url, params=params)
+        context.bot.answer_callback_query(
+            query.id, text="There is no queue. You will be assigned the first available machine.", show_alert=True)
         if queue:
             params = {'location': data}
             url = QUEUEURL + 'queuelist'
