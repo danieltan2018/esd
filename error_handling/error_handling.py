@@ -18,7 +18,7 @@ channel.exchange_declare(exchange=exchangename, exchange_type='topic')
 def receiveError():
     # prepare a queue for receiving messages
     # 'durable' makes the queue survive broker restarts
-    channelqueue = channel.queue_declare(queue="errorhandler", durable=True)
+    channelqueue = channel.queue_declare(queue="", exclusive=True)
     queue_name = channelqueue.method.queue
     channel.queue_bind(exchange=exchangename,
                        queue=queue_name, routing_key='*.error')
