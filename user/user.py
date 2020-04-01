@@ -90,6 +90,7 @@ def amqpcallback(channel, method, properties, body):
             newuser = nextuser.json()
             newwash(newuser['user_id'], newuser['queue_id'],
                     location, machine_id)
+        return
 
 
 @run_async
