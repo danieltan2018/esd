@@ -66,10 +66,8 @@ def receiveOrderLog():
     channel.exchange_declare(exchange=exchangename, exchange_type='topic')
     channelqueue = channel.queue_declare(queue='', exclusive=True)
     queue_name = channelqueue.method.queue
-    channel.queue_bind(exchange=exchangename,
-                       queue=queue_name, routing_key='#')
-    channel.basic_consume(
-        queue=queue_name, on_message_callback=callback, auto_ack=True)
+    channel.queue_bind(exchange=exchangename,queue=queue_name, routing_key='#')
+    channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
     channel.start_consuming()
 
 
