@@ -236,7 +236,7 @@ def joinqueue(update, context):
             if nextuser.status_code == 200:
                 nextuser = nextuser.json()
                 newwash(nextuser['user_id'],
-                        nextuser['queue_id'], location, machine_id)
+                        nextuser['queue_id'], data, machine_id)
     except:
         context.bot.answer_callback_query(
             query.id, text="Sorry, we are having trouble connecting to our Queue system.", show_alert=True)
