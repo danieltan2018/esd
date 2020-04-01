@@ -59,7 +59,7 @@ pendingusers = {}
 
 @run_async
 def startamqp():
-    channelqueue = channel.queue_declare(queue="monitoring", durable=True)
+    channelqueue = channel.queue_declare(queue='', durable=True)
     queue_name = channelqueue.method.queue
     channel.queue_bind(exchange=exchangename,
                        queue=queue_name, routing_key='*.status')
