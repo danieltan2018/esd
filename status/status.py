@@ -296,15 +296,13 @@ def send_status(status):
 
     if "code" in status:
         # inform Error
-        print("Hr")
         channel.queue_declare(queue='errorhandler', durable=True)
         channel.queue_bind(exchange=exchangename,
                            queue='errorhandler', routing_key='*.error')
         channel.basic_publish(exchange=exchangename, routing_key="machine.error",
                               body=message, properties=pika.BasicProperties(delivery_mode=2))
-    elif status["errcodeid"] != 'none':
+    elif status["errcodeid"] != 'none' or str(status["errcodeid"]) != '0':
         # inform Error
-        print("there")
         channel.queue_declare(queue='errorhandler', durable=True)
         channel.queue_bind(exchange=exchangename,
                            queue='errorhandler', routing_key='*.error')
