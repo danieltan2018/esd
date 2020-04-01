@@ -74,7 +74,7 @@ def insert_queue():
 @app.route("/calculateWaitTime")
 def calculate_wait_time():
     location = request.args.get('location')
-    queryURL = statusURL+"countMachine?location="+location
+    queryURL = statusURL+"/countMachine?location="+location
     machines = requests.get(queryURL).json()
     noMachines = int(machines['availandunavail'])
     wait_time = 0
