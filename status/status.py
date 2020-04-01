@@ -201,20 +201,20 @@ def update_machine_User():
             code = 400
             result = {"code": code, "message": "Duplicate Userid"}
         else:
-        if status.curuser == None:
-            status.curuser = curuser
-            startcode = uuid.uuid4()
-            status.startcode = startcode.hex
-            status.statuscodeid = 1
-        elif status.curuser != None:
-            prevuser = status.curuser
-            prevusercode = status.startcode
-            status.curuser = cursuer
-            status.statuscodeid = 1
-            startcode = uuid.uuid4()
-            status.startcode = startcode.hex
-            status.prevuser = prevuser
-            status.unlockcode = prevusercode
+            if status.curuser == None:
+                status.curuser = curuser
+                startcode = uuid.uuid4()
+                status.startcode = startcode.hex
+                status.statuscodeid = 1
+            elif status.curuser != None:
+                prevuser = status.curuser
+                prevusercode = status.startcode
+                status.curuser = curuser
+                status.statuscodeid = 1
+                startcode = uuid.uuid4()
+                status.startcode = startcode.hex
+                status.prevuser = prevuser
+                status.unlockcode = prevusercode
 
     else:
         code = 400

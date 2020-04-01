@@ -53,4 +53,6 @@ def sendMessage(order):
               "o:tracking": False})
 
 
-receiveError()
+if __name__ == '__main__':
+    print("This is " + os.path.basename(__file__) + ": processing an order error...")
+    receiveError()
