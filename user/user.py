@@ -59,7 +59,7 @@ pendingusers = {}
 
 @run_async
 def startamqp():
-    channelqueue = channel.queue_declare(queue="status", durable=True)
+    channelqueue = channel.queue_declare(queue="monitoring", durable=True)
     queue_name = channelqueue.method.queue
     channel.queue_bind(exchange=exchangename,
                        queue=queue_name, routing_key='*.status')
@@ -193,7 +193,6 @@ def selectqueue(update, context):
 
 @run_async
 def joinqueue(update, context):
-    # WARNING: nextuser may return the same user for more than one machine
     query = update.callback_query
     data = query.data
     data = data.replace('JOINQUEUE=', '')
