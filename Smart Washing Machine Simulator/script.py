@@ -49,7 +49,7 @@ if user_command == "turn on all":
 if user_command == "use machine":
     
     # Getting necessary parameters
-    location = input("Where are you now? (If Bukit Panjang, write bukit%panjang) ")
+    location = input("Where are you now? ")
     machine_id = input("What is your Machine ID? ")
     qrcode = input("What is your QR Code? ")
 
@@ -105,7 +105,7 @@ if user_command == "use machine":
 #Functionality 5: Turn off one machine 
 
 if user_command == "turn off one machine":
-    location = input("Where are you now? (If Bukit Panjang, write bukit%panjang) ")
+    location = input("Where are you now? ")
     machine_id = input("What is your Machine ID? ")
     updateURL = "http://status.delaundro.me/updateMachineStatus?machineid=" + machine_id + "&location=" + location
     payload = {
