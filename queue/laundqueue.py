@@ -126,14 +126,14 @@ def get_wash_type():
 def alloc_Machine():
     user_id = request.args.get('user_id')
     queue_id = request.args.get('queue_id')
+    wash_type = request.args.get('wash_type')
+    machine_id = request.args.get('machine_id')
     code = 200
     result = {}
     laundqueue = LaundQueue.query.filter_by(
         user_id=user_id, queue_id=queue_id).first()
     if laundqueue:
-        wash_type = request.json["wash_type"]
         laundqueue.wash_type = wash_type
-        machine_id = request.json['machine_id']
         laundqueue.machine_id = machine_id
     else:
         code = 400
@@ -161,9 +161,6 @@ def service_details():
     if laundqueue:
         db.session.delete(laundqueue)
         db.session.commit()
-        return jsonify({"user_id": user_id, "wash_type": wash_type, "duration": 45, "cost": cost})
-
-    return jsonify({"message": "Machine not found."}), 404
 
 # # #Remove from Queue
 # @app.route("/dequeue/<string:location>&<int:queue_id>")

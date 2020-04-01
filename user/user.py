@@ -8,12 +8,12 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler,
 from telegram.ext.dispatcher import run_async
 import pika
 import json
-'''
+
 import logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-'''
+
 BOTTOKEN = os.getenv('BOTTOKEN')
 PORT = 88
 bot = telegram.Bot(token=BOTTOKEN)
@@ -68,6 +68,7 @@ def startamqp():
     channel.start_consuming()
 
 
+@run_async
 def amqpcallback(channel, method, properties, body):
     status = json.loads(body)
     statuscode = status['statuscodeid']
@@ -89,9 +90,10 @@ def amqpcallback(channel, method, properties, body):
             newuser = nextuser.json()
             newwash(newuser['user_id'], newuser['queue_id'],
                     location, machine_id)
-    return
+        return
 
 
+@run_async
 def paymentamqp(message):
     message = json.dumps(message, default=str)
     channel.queue_declare(queue='monitoring', durable=True)
@@ -99,6 +101,7 @@ def paymentamqp(message):
                        queue='monitoring', routing_key='#')
     channel.basic_publish(exchange=exchangename, routing_key="payment.info",
                           body=message, properties=pika.BasicProperties(delivery_mode=2))
+    return
 
 
 @run_async
@@ -109,6 +112,7 @@ def send(id, msg, keyboard):
     return
 
 
+@run_async
 def start(update, context):
     id = update.message.chat_id
     deeplink = ''.join(context.args)
@@ -119,6 +123,7 @@ def start(update, context):
     return
 
 
+@run_async
 def callbackquery(update, context):
     query = update.callback_query
     data = query.data
@@ -130,8 +135,10 @@ def callbackquery(update, context):
         cancelqueue(update, context)
     elif data.startswith('WASHTYPE='):
         dopayment(update, context)
+    return
 
 
+@run_async
 def welcome(update, context):
     id = update.message.chat_id
     send(id, "*Welcome to DE’Laundro!*", [])
@@ -139,6 +146,7 @@ def welcome(update, context):
     return
 
 
+@run_async
 def selectlocation(id, update, context):
     try:
         url = STATUSURL + 'findLocation'
@@ -155,6 +163,7 @@ def selectlocation(id, update, context):
     return
 
 
+@run_async
 def selectqueue(update, context):
     query = update.callback_query
     data = query.data
@@ -187,6 +196,7 @@ def selectqueue(update, context):
     return
 
 
+@run_async
 def joinqueue(update, context):
     query = update.callback_query
     data = query.data
@@ -211,8 +221,6 @@ def joinqueue(update, context):
         params = {'location': data, 'user_id': chat_id}
         url = QUEUEURL + 'newqueue'
         requests.post(url=url, params=params)
-        context.bot.answer_callback_query(
-            query.id, text="There is no queue. You will be assigned the first available machine.", show_alert=True)
         if queue:
             params = {'location': data}
             url = QUEUEURL + 'queuelist'
@@ -224,6 +232,8 @@ def joinqueue(update, context):
             context.bot.answer_callback_query(
                 query.id, text="There are {} people ahead of you. We will notify you when it's your turn.".format(queuelength), show_alert=True)
         else:
+            context.bot.answer_callback_query(
+                query.id, text="There is no queue. You will be assigned the first available machine.", show_alert=True)
             params = {'location': data}
             url = QUEUEURL + 'nextuser'
             nextuser = requests.get(url=url, params=params)
@@ -244,6 +254,7 @@ def joinqueue(update, context):
     return
 
 
+@run_async
 def cancelqueue(update, context):
     query = update.callback_query
     id = query.message.chat_id
@@ -253,6 +264,7 @@ def cancelqueue(update, context):
     return
 
 
+@run_async
 def newwash(user_id, queue_id, location, machine_id):
     try:
         params = {'location': location,
@@ -260,7 +272,7 @@ def newwash(user_id, queue_id, location, machine_id):
         url = STATUSURL + 'updateMachineUser'
         requests.put(url=url, params=params)
     except:
-        send(id, "_Sorry, we are having trouble connecting to our Status system._", [])
+        send(user_id, "_Sorry, we are having trouble connecting to our Status system._", [])
         return
     global pendingusers
     pendingusers[user_id] = {'queue': queue_id,
@@ -270,10 +282,11 @@ def newwash(user_id, queue_id, location, machine_id):
     for washtype in WASHTYPES:
         keyboard.append([InlineKeyboardButton(
             washtype, callback_data='WASHTYPE={}'.format(washtype))])
-    send(id, msg, keyboard)
+    send(user_id, msg, keyboard)
     return
 
 
+@run_async
 def dopayment(update, context):
     query = update.callback_query
     data = query.data
@@ -282,9 +295,9 @@ def dopayment(update, context):
     id = query.message.chat_id
     try:
         params = {'user_id': id, 'queue_id': pendingusers[id]['queue'],
-                  'machine_id': machine_id, 'wash_type': washtype}
+                  'machine_id': pendingusers[id]['machine'], 'wash_type': washtype}
         url = QUEUEURL + 'allocateMachine'
-        requests.post(url=url, params=params)
+        requests.put(url=url, params=params)
     except:
         send(id, "_Sorry, we are having trouble connecting to our Queue system._", [])
         return
@@ -304,6 +317,7 @@ def dopayment(update, context):
     return
 
 
+@run_async
 def precheckout(update, context):
     query = update.pre_checkout_query
     if query.invoice_payload != 'delaundro-pay':
@@ -313,6 +327,7 @@ def precheckout(update, context):
     return
 
 
+@run_async
 def paymentsuccess(update, context):
     user_id = update.message.chat_id
     paymentdetails = {"payment": user_id}
@@ -323,6 +338,7 @@ def paymentsuccess(update, context):
     return
 
 
+@run_async
 def sendqr(update, context):
     id = update.message.chat_id
     try:
@@ -348,6 +364,7 @@ def main():
     dp.add_handler(PreCheckoutQueryHandler(precheckout))
     dp.add_handler(MessageHandler(Filters.successful_payment, paymentsuccess))
 
+    updater.start_polling()  # DEBUG ONLY
     startamqp()
     updater.start_webhook(listen='0.0.0.0',
                           port=PORT,
