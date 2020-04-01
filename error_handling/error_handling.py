@@ -43,13 +43,15 @@ def processError(order):
 
 
 def sendMessage(order):
+    message = order['machineid'] + " at " + order['location'] + " error " + oder['errcodeid']
+    print(message)
     return requests.post(
         "https://api.mailgun.net/v3/delaundro.me/messages",
         auth=("api", MAILGUNKEY),
         data={"from": "DeLaundro <do_not_reply@delaundro.me>",
               "to": ["admin@delaundro.me"],
               "subject": "Machine Error",
-              "text":  order['errcodeid'] ,
+              "text":  message ,
               "o:tracking": False})
     
 
