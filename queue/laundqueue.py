@@ -161,9 +161,6 @@ def service_details():
     if laundqueue:
         db.session.delete(laundqueue)
         db.session.commit()
-        return jsonify({"user_id": user_id, "wash_type": wash_type, "duration": 45, "cost": cost})
-
-    return jsonify({"message": "Machine not found."}), 404
 
 # # #Remove from Queue
 # @app.route("/dequeue/<string:location>&<int:queue_id>")
