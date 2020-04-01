@@ -300,7 +300,7 @@ def send_status(status):
             #inform Error
         channel.queue_declare(queue='errorhandler', durable=True)
         channel.queue_bind(exchange=exchangename, queue='errorhandler', routing_key='*.error')
-        channel.basic_publish(exchange=exchangename, routing_key="machine.error", body=test.json(),properties=pika.BasicProperties(delivery_mode = 2))
+        channel.basic_publish(exchange=exchangename, routing_key="machine.error", body=message,properties=pika.BasicProperties(delivery_mode = 2))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, threaded=True)
