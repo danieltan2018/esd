@@ -126,7 +126,7 @@ def get_wash_type():
 def alloc_Machine():
     user_id = request.args.get('user_id')
     queue_id = request.args.get('queue_id')
-    wash_type = request.args.get('wash_type')
+    wash_type = request.args.get('service_type')
     machine_id = request.args.get('machine_id')
     code = 200
     result = {}
