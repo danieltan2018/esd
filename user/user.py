@@ -8,12 +8,12 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler,
 from telegram.ext.dispatcher import run_async
 import pika
 import json
-
+'''
 import logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
+'''
 BOTTOKEN = os.getenv('BOTTOKEN')
 PORT = 88
 bot = telegram.Bot(token=BOTTOKEN)
@@ -59,7 +59,7 @@ pendingusers = {}
 
 @run_async
 def startamqp():
-    channelqueue = channel.queue_declare(queue="monitoring", durable=True)
+    channelqueue = channel.queue_declare(queue='', durable=True)
     queue_name = channelqueue.method.queue
     channel.queue_bind(exchange=exchangename,
                        queue=queue_name, routing_key='*.status')
