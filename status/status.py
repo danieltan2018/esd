@@ -54,15 +54,6 @@ def get_available():
     return jsonify({"status": [status.json() for status in Status.query.all()]})
 
 
-@app.route("/findUser")
-def find_by_User():
-    location = request.args.get('curuser')
-    status = Status.query.filter_by(curuser=curuser).all()
-    if status:
-        return jsonify({"paid": 1 })
-    return jsonify({"unpaid": 0})
-
-
 @app.route("/countMachine")
 def count_by_location():
     location = request.args.get('location')

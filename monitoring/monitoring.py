@@ -10,6 +10,10 @@ import os
 import pika
 import threading
 
+
+STATUSURL = 'http://status.delaundro.me/'
+
+
 app = Flask(__name__)
 dbURL = 'mysql+mysqlconnector://root@db:3306/monitoring'
 app.config['SQLALCHEMY_DATABASE_URI'] = dbURL
@@ -76,13 +80,18 @@ def callback(channel, method, properties, body):
 
 
 def insert_log(order):
+    payment = STATUSURL + "getQRCode/" + "machineid=" + order['machineid'] + "&" +"location=" + order['location']
     location = order['location']
     machineid = order['machineid']
     statuscodeid = order['statuscodeid']
     errcodeid = order['errcodeid']
     now = datetime.now()
+    if payment['startcode'] != None:
+        payment = 1
+    else:
+        payment = 0
     data = {"m_id": None, "machineid": machineid, "location": location,
-            "statuscodeid": statuscodeid, "errcodeid": errcodeid, "payment": None, "date_time": now}
+            "statuscodeid": statuscodeid, "errcodeid": errcodeid, "payment": payment, "date_time": now}
     monitoring = Monitoring(**data)
     db.session.add(monitoring)
     db.session.commit()
