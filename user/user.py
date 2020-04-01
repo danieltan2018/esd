@@ -367,7 +367,6 @@ def main():
     dp.add_handler(PreCheckoutQueryHandler(precheckout))
     dp.add_handler(MessageHandler(Filters.successful_payment, paymentsuccess))
 
-    updater.start_polling()  # DEBUG ONLY
     startamqp()
     updater.start_webhook(listen='0.0.0.0',
                           port=PORT,
