@@ -225,7 +225,6 @@ def update_machine_User():
 
     if code == 200:
         result = status.json()
-    send_status(result)
     return str(result), code
 
 
