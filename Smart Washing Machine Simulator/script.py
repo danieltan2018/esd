@@ -30,14 +30,19 @@ if user_command == "turn on all":
 
     for location in locations:
         for i in range(1,7):
-
-            # Send PUT request 
-            #Function to send message 
+        
             # sendURL = "http://127.0.0.1:8002/createMachine?machineid=" + str(i) + "&location=" + location
             sendURL = "http://status.delaundro.me/createMachine?machineid=" + str(i) + "&location=" + location
             print(sendURL)
             r = requests.post(sendURL)
             # print(r.text)
+            # Update to in use 
+            updateURL = "http://status.delaundro.me/updateMachineStatus?machineid=" + str(i) + "&location=" + location
+            payload = {
+                "statuscodeid": 1
+            }
+            b = requests.put(updateURL,json=payload)
+            # print(b.text)
 
 # Functionality 4: Start a machine with a QR code.
 if user_command == "use machine":
@@ -64,9 +69,11 @@ if user_command == "use machine":
 
     if startcode == qrcode:
 
-        # Change status of machine 
-        # change_status_url = "http://127.0.0.1:8002/updateMachineToInUse?machineid=" + machine_id + "&location=" + location
-        change_status_url = "http://status.delaundro.me/updateMachineToInUse?machineid=" + machine_id + "&location=" + location        
+        # Change status of machine to in use 
+        change_status_url = "http://status.delaundro.me/updateMachineStatus?machineid=" + machine_id + "&location=" + location        
+        payload = {
+                "statuscodeid": 1
+            }
         x = requests.put(change_status_url)
 
         # print(change_status_url)
@@ -92,6 +99,19 @@ if user_command == "use machine":
         washtype = washtype_object["wash type"]
 
         print("Your machine has started. Your wash type is: " + washtype)
+
+
+#Functionality 5: Turn off one machine 
+
+if user_command == "turn off one machine":
+    location = input("Where are you now? (If Bukit Panjang, write bukit%panjang) ")
+    machine_id = input("What is your Machine ID? ")
+    change_status_url = "http://status.delaundro.me/updateMachineToInUse?machineid=" + machine_id + "&location=" + location
+    x = requests.put(change_status_url)
+    # print(change_status_url)
+    # print(x.text)
+
+# Functionality 6: Create error 
 
 # #Functionality 2: Populate and turn off all washers 
 
