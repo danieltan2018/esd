@@ -73,21 +73,33 @@ def receiveOrderLog():
     channel.start_consuming()
 
 
-def callback(channel, method, properties, body):
-    insert_log(json.loads(body))
+def callback(channel, method, properties, body): # required signature for the callback; no return
+    print("Received an order log by " + __file__)
+    processOrderLog(json.loads(body))
+    print() # print a new line feed
+
+def processOrderLog(order):
+    print("Recording an order log:")
+    print(order,"here")
+    insert_log(order)
 
 
 def insert_log(order):
-    location = order['location']
-    machineid = order['machineid']
-    statuscodeid = order['statuscodeid']
-    errcodeid = order['errcodeid']
-    now = datetime.now()
-    data = {"m_id": None, "machineid": machineid, "location": location,
-            "statuscodeid": statuscodeid, "errcodeid": errcodeid, "payment": None, "date_time": now}
-    monitoring = Monitoring(**data)
-    db.session.add(monitoring)
-    db.session.commit()
+   code = 200
+   result = {}
+   location = order['location']
+   machineid = order['machineid']
+   statuscodeid = order['statuscodeid']
+   errcodeid = order['errcodeid']
+   now = datetime.now()
+   data = {"m_id":None, "machineid": machineid, "location": location, "statuscodeid": statuscodeid, "errcodeid": errcodeid, "payment": None, "date_time": now}
+   monitoring = Monitoring(**data)
+   try:
+        db.session.add(monitoring)
+        db.session.commit()
+   except:
+        code = 500
+        result = {"code": code, "message": "Error Updating Data"}
 
 
 if __name__ == '__main__':
