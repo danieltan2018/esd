@@ -43,7 +43,7 @@ def processError(order):
 
 
 def sendMessage(order):
-    message = order['machineid'] + " at " + order['location'] + " error " + oder['errcodeid']
+    message = order['machineid'] ," at " , order['location'] , " error " , order['errcodeid']
     print(message)
     return requests.post(
         "https://api.mailgun.net/v3/delaundro.me/messages",
