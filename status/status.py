@@ -306,6 +306,7 @@ def send_status(status):
 
     if "code" in status:
         # inform Error
+        print(True)
         channel.queue_declare(queue='errorhandler', durable=True)
         channel.queue_bind(exchange=exchangename,
                            queue='errorhandler', routing_key='*.error')
@@ -313,6 +314,7 @@ def send_status(status):
                               body=message, properties=pika.BasicProperties(delivery_mode=2))
     elif status["errcodeid"] != 'none':
         # inform Error
+        Print(False)
         channel.queue_declare(queue='errorhandler', durable=True)
         channel.queue_bind(exchange=exchangename,
                            queue='errorhandler', routing_key='*.error')
