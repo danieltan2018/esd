@@ -133,7 +133,7 @@ def alloc_Machine():
     laundqueue = LaundQueue.query.filter_by(
         user_id=user_id, queue_id=queue_id).first()
     if laundqueue:
-        laundqueue.wash_type = wash_type
+        laundqueue.service_type = wash_type
         laundqueue.machine_id = machine_id
     else:
         code = 400
