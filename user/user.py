@@ -230,7 +230,7 @@ def joinqueue(update, context):
             context.bot.answer_callback_query(
                 query.id, text="There are {} people ahead of you. We will notify you when it's your turn.".format(queuelength), show_alert=True)
         else:
-            params = {'location': location}
+            params = {'location': data}
             url = QUEUEURL + 'nextuser'
             nextuser = requests.get(url=url, params=params)
             if nextuser.status_code == 200:
