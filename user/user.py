@@ -336,7 +336,7 @@ def paymentsuccess(update, context):
     paymentdetails = {"payment": user_id}
     paymentamqp(paymentdetails)
     machine_id = pendingusers[user_id]['machine']
-    send(user_id, "Thank you for your payment! Please proceed to *{}*.".format(machine_id), [])
+    send(user_id, "Thank you for your payment! Please proceed to *Machine {}*.".format(machine_id), [])
     sendqr(update, context)
     return
 
