@@ -80,18 +80,13 @@ def callback(channel, method, properties, body):
 
 
 def insert_log(order):
-    payment = STATUSURL + "getQRCode/" + "machineid=" + order['machineid'] + "&" +"location=" + order['location']
     location = order['location']
     machineid = order['machineid']
     statuscodeid = order['statuscodeid']
     errcodeid = order['errcodeid']
     now = datetime.now()
-    if payment['startcode'] != None:
-        payment = 1
-    else:
-        payment = 0
     data = {"m_id": None, "machineid": machineid, "location": location,
-            "statuscodeid": statuscodeid, "errcodeid": errcodeid, "payment": payment, "date_time": now}
+            "statuscodeid": statuscodeid, "errcodeid": errcodeid, "payment": 0, "date_time": now}
     monitoring = Monitoring(**data)
     db.session.add(monitoring)
     db.session.commit()
