@@ -75,7 +75,7 @@ if user_command == "use machine":
         payload = {
                 "statuscodeid": 1
             }
-        x = requests.put(change_status_url)
+        x = requests.put(change_status_url,json=payload)
 
         # print(change_status_url)
         # print(x.text)
@@ -107,8 +107,13 @@ if user_command == "use machine":
 if user_command == "turn off one machine":
     location = input("Where are you now? (If Bukit Panjang, write bukit%panjang) ")
     machine_id = input("What is your Machine ID? ")
-    change_status_url = "http://status.delaundro.me/updateMachineToInUse?machineid=" + machine_id + "&location=" + location
-    x = requests.put(change_status_url)
+    updateURL = "http://status.delaundro.me/updateMachineStatus?machineid=" + machine_id + "&location=" + location
+    payload = {
+        "statuscodeid": 0
+    }
+    print(updateURL)
+    x = requests.put(updateURL,json=payload)
+
     # print(change_status_url)
     # print(x.text)
 
