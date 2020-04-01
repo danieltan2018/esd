@@ -197,24 +197,20 @@ def update_machine_User():
     if(Status.query.filter_by(machineid=machineid, location=location, errcodeid=0).first()):
         status = Status.query.filter_by(
             machineid=machineid, location=location).first()
-        if curuser == status.curuser:
-            code = 400
-            result = {"code": code, "message": "Duplicate Userid"}
-        else:
-            if status.curuser == None:
-                status.curuser = curuser
-                startcode = uuid.uuid4()
-                status.startcode = startcode.hex
-                status.statuscodeid = 1
-            elif status.curuser != None:
-                prevuser = status.curuser
-                prevusercode = status.startcode
-                status.curuser = cursuer
-                status.statuscodeid = 1
-                startcode = uuid.uuid4()
-                status.startcode = startcode.hex
-                status.prevuser = prevuser
-                status.unlockcode = prevusercode
+        if status.curuser == None:
+            status.curuser = curuser
+            startcode = uuid.uuid4()
+            status.startcode = startcode.hex
+            status.statuscodeid = 1
+        elif status.curuser != None:
+            prevuser = status.curuser
+            prevusercode = status.startcode
+            status.curuser = cursuer
+            status.statuscodeid = 1
+            startcode = uuid.uuid4()
+            status.startcode = startcode.hex
+            status.prevuser = prevuser
+            status.unlockcode = prevusercode
 
     else:
         code = 400

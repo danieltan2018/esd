@@ -47,6 +47,13 @@
           <li class="nav-item active">
             <a class="nav-link" href="monitoring.html"><h2>Monitoring</h1></a>
           </li>
+          </ul>
+        
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" onclick="signOut()"><h2>Logout</h1></a>
+            </li>
+        </ul>
 
       </nav>
 
@@ -86,7 +93,7 @@
         // - using await requires the function that calls it to be async
         $(async() => {           
             // Change serviceURL to your own
-            var serviceURL = "monitoring.delaundro.me";
+            var serviceURL = "http://monitoring.delaundro.me/";
     
             try {
                 const response =
@@ -103,11 +110,18 @@
                     // for loop to setup all table rows with obtained monitoring data
                     var rows = "";
                     for (const monitor of monitoring) {
+
+                        // Get rid of %
+                        if (monitor.location == "Bukit%Panjang"){
+                            var location = "Bukit Panjang"
+                        } else {
+                            var location = monitor.location
+                        }
                         
                         eachRow =
                             "<td>" + monitor.m_id + "</td>"+
                             "<td>" + monitor.machineid + "</td>" +
-                            "<td>" + monitor.location + "</td>" +
+                            "<td>" + location + "</td>" +
                             "<td>" + monitor.statuscodeid + "</td>"+
                             "<td>" + monitor.errcodeid + "</td>" +
                             "<td>" + monitor.payment + "</td>" +
@@ -126,6 +140,13 @@
             
             } // error
         });
+
+    function signOut()
+        {
+            alert("You have successfully logged out");
+            window.location.replace("index.html");
+            sessionStorage.clear();
+        }
 
     </script>
 
