@@ -64,9 +64,9 @@ def receiveOrderLog():
     channel = connection.channel()
     exchangename = "laundro_topic"
     channel.exchange_declare(exchange=exchangename, exchange_type='topic')
-    channelqueue = channel.queue_declare(queue="monitoring", durable=True)
+    channelqueue = channel.queue_declare(queue="", durable=True)
     queue_name = channelqueue.method.queue
-    channel.queue_bind(exchange=exchangename,queue=queue_name, routing_key='*.status')
+    channel.queue_bind(exchange=exchangename,queue=queue_name, routing_key='#')
     channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
     channel.start_consuming()
 
