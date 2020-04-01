@@ -8,7 +8,7 @@ import json
 import requests
 
 #Store locations into an array
-locations = ["Novena","Balestier","Bukit%Panjang"]
+locations = ["Novena","Balestier","Bukit Panjang"]
 
 
 # def update(payload,URL):
@@ -41,6 +41,7 @@ if user_command == "turn on all":
             payload = {
                 "statuscodeid": 1
             }
+            print(updateURL)
             b = requests.put(updateURL,json=payload)
             # print(b.text)
 
