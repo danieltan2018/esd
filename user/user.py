@@ -343,7 +343,7 @@ def sendqr(update, context):
     id = update.message.chat_id
     try:
         params = {'location': pendingusers[id]['location'],
-                  'machineid': pendingusers[id]['machine_id']}
+                  'machineid': pendingusers[id]['machine']}
         url = STATUSURL + 'getQRCode'
         startcode = requests.get(url=url, params=params).json()['startcode']
     except:

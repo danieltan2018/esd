@@ -118,7 +118,7 @@ def get_wash_type():
     wash_type = laundqueue.json()["service_type"]
     if wash_type == None:
         return jsonify({"wash type": "Wash Type not indicated yet"})
-    return jsonify({"wash type": wash_type})
+    return jsonify({"wash type": wash_type}), 200
 
 
 # Insert MachineID and and Washtype to Queue
@@ -137,16 +137,16 @@ def alloc_Machine():
         laundqueue.machine_id = machine_id
     else:
         code = 400
-        result = {"code": code, "message": "No such Data"}
+        result = {"message": "No such Data"}
     try:
         db.session.commit()
     except:
         code = 500
-        result = {"code": code, "message": "Error Updating Data"}
+        result = {"message": "Error Updating Data"}
 
     if code == 200:
         result = laundqueue.json()
-    return result
+    return result, code
 
 
 # Return  duration, cost
@@ -155,12 +155,12 @@ def alloc_Machine():
 def service_details():
     user_id = request.args.get('user_id')
     location = request.args.get('location')
-    cost = 0
     laundqueue = LaundQueue.query.filter_by(
         user_id=user_id, location=location).first()
     if laundqueue:
         db.session.delete(laundqueue)
         db.session.commit()
+    return {"Status": "Success"}, 200
 
 # # #Remove from Queue
 # @app.route("/dequeue/<string:location>&<int:queue_id>")
