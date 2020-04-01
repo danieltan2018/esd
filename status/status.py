@@ -247,6 +247,8 @@ def create_machine():
         code = 500
         result = {"code": code, "message": "Error Updating Data"}
     if code == 200:
+        if errcodeid == 0:
+            status.errcodeid = "none"
         result = status.json()
     send_status(result)
     return str(result), code
@@ -294,12 +296,22 @@ def send_status(status):
     channel.basic_publish(exchange=exchangename, routing_key="machine.status",
                               body=message, properties=pika.BasicProperties(delivery_mode=2))
 
-    
-    if status["errcodeid"] != 'none' or str(status["errcodeid"]) != '0':
+ 
+    if "code" in status:
+        #inform Error
+        channel.queue_declare(queue='errorhandler', durable=True)
+        channel.queue_bind(exchange=exchangename, queue='errorhandler', routing_key='*.error')
+        channel.basic_publish(exchange=exchangename, routing_key="machine.error", body=message,properties=pika.BasicProperties(delivery_mode = 2))
+    elif status["errcodeid"] != 'none':
             #inform Error
         channel.queue_declare(queue='errorhandler', durable=True)
         channel.queue_bind(exchange=exchangename, queue='errorhandler', routing_key='*.error')
         channel.basic_publish(exchange=exchangename, routing_key="machine.error", body=message,properties=pika.BasicProperties(delivery_mode = 2))
+    else:
+        #inform shipping
+         channel.queue_declare(queue='monitoring', durable=True)
+         channel.queue_bind(exchange=exchangename, queue='monitoring', routing_key='*.status')
+         channel.basic_publish(exchange=exchangename, routing_key="machine.status", body=message,properties=pika.BasicProperties(delivery_mode = 2))
     connection.close()
 
 
