@@ -304,6 +304,11 @@ def send_status(status):
                            queue='errorhandler', routing_key='*.error')
         channel.basic_publish(exchange=exchangename, routing_key="machine.error",
                               body=message, properties=pika.BasicProperties(delivery_mode=2))
+    else:
+        channel.queue_declare(queue='monitoring', durable=True)
+        channel.queue_bind(exchange=exchangename,queue='monitoring', routing_key='*.status')
+        channel.basic_publish(exchange=exchangename, routing_key="machine.status",
+                                body=message, properties=pika.BasicProperties(delivery_mode=2))
     connection.close()
 
 
