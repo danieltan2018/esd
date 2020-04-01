@@ -59,7 +59,7 @@ pendingusers = {}
 
 @run_async
 def startamqp():
-    channelqueue = channel.queue_declare(queue='', durable=True)
+    channelqueue = channel.queue_declare(queue='', exclusive=True)
     queue_name = channelqueue.method.queue
     channel.queue_bind(exchange=exchangename,
                        queue=queue_name, routing_key='*.status')
@@ -75,11 +75,13 @@ def amqpcallback(channel, method, properties, body):
     statuscode = status['statuscodeid']
     id = status['curuser']
     if statuscode == 1:
-        send(id, "*Your wash has started!*\nWe will notify you when it's done.", [])
+        if id:
+            send(id, "*Your wash has started!*\nWe will notify you when it's done.", [])
     elif statuscode == 0:
-        send(id, "*Wash Complete!*\nPlease collect your laundry within 15 minutes.", [])
-        send(
-            id, "Thank you for choosing DE'Laundro. To start another wash, [click here](https://t.me/delaundrobot?start=delaundro).", [])
+        if id:
+            send(id, "*Wash Complete!*\nPlease collect your laundry within 15 minutes.", [])
+            send(
+                id, "Thank you for choosing DE'Laundro. To start another wash, [click here](https://t.me/delaundrobot?start=delaundro).", [])
         location = status['location']
         machine_id = status['machineid']
         params = {'location': location}
