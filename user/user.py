@@ -217,11 +217,11 @@ def joinqueue(update, context):
         return
     try:
         params = {'location': data, 'user_id': chat_id}
-        url = QUEUE + 'newqueue'
+        url = QUEUEURL + 'newqueue'
         requests.post(url=url, params=params)
         if queue:
             params = {'location': data}
-            url = QUEUE + 'queuelist'
+            url = QUEUEURL + 'queuelist'
             queuelist = requests.get(url=url, params=params)
             if queuelist.status_code == 200:
                 queuelength = len(queuelist.json()['queue'])
