@@ -93,7 +93,7 @@ if user_command == "use machine":
 
         # Get washtype from Queue
         # washtype_url = "http://127.0.0.1:5000/washtype?user_id=" + str(userid)
-        washtype_url = "http://status.delaundro.me/washtype?user_id=" + str(userid)  
+        washtype_url = "http://queue.delaundro.me/washtype?user_id=" + str(userid)  
         a = requests.get(washtype_url)
         # print(a.text)
         washtype_object = a.json()
