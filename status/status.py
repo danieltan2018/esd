@@ -191,24 +191,25 @@ def update_machine_Error():
 def update_machine_User():
     machineid = request.args.get('machineid')
     location = request.args.get('location')
+    cursuer = request.args.get('curuser')
     code = 200
     result = {}
     if(Status.query.filter_by(machineid=machineid, location=location, errcodeid=0).first()):
         status = Status.query.filter_by(
             machineid=machineid, location=location).first()
-        if request.json["curuser"] == status.curuser:
+        if curuser == status.curuser:
             code = 400
             result = {"code": code, "message": "Duplicate Userid"}
         else:
             if status.curuser == None:
-                status.curuser = request.json["curuser"]
+                status.curuser = curuser
                 startcode = uuid.uuid4()
                 status.startcode = startcode.hex
                 status.statuscodeid = 1
             elif status.curuser != None:
                 prevuser = status.curuser
                 prevusercode = status.startcode
-                status.curuser = request.json["curuser"]
+                status.curuser = cursuer
                 status.statuscodeid = 1
                 startcode = uuid.uuid4()
                 status.startcode = startcode.hex
