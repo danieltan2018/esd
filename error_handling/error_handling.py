@@ -49,8 +49,9 @@ def sendMessage(order):
         data={"from": "DeLaundro <do_not_reply@delaundro.me>",
               "to": ["admin@delaundro.me"],
               "subject": "Machine Error",
-              "text":  order ,
+              "text":  order['errcodeid'] ,
               "o:tracking": False})
+    
 
 
 if __name__ == '__main__':
