@@ -71,6 +71,7 @@ def startamqp():
 @run_async
 def amqpcallback(channel, method, properties, body):
     status = json.loads(body)
+    print(status)
     statuscode = status['statuscodeid']
     id = status['curuser']
     if statuscode == 1:
