@@ -76,7 +76,7 @@ def amqpcallback(channel, method, properties, body):
     if statuscode == 1:
         if id:
             send(id, "*Your wash has started!*\nWe will notify you when it's done.", [])
-            params = {'user_id' = id, 'location': status['location']}
+            params = {'user_id': id, 'location': status['location']}
             url = QUEUEURL + 'serviceDequeue'
             nextuser = requests.get(url=url, params=params)
     elif statuscode == 0:
