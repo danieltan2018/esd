@@ -71,7 +71,6 @@ def startamqp():
 @run_async
 def amqpcallback(channel, method, properties, body):
     status = json.loads(body)
-    print(status)
     statuscode = status['statuscodeid']
     id = status['curuser']
     if statuscode == 1:
@@ -88,8 +87,8 @@ def amqpcallback(channel, method, properties, body):
         url = QUEUEURL + 'nextuser'
         nextuser = requests.get(url=url, params=params)
         if nextuser.status_code == 200:
-            nextuser = nextuser.json()
-            newwash(nextuser['user_id'], nextuser['queue_id'],
+            newuser = nextuser.json()
+            newwash(newuser['user_id'], newuser['queue_id'],
                     location, machine_id)
 
 
