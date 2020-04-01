@@ -293,14 +293,15 @@ def send_status(status):
     channel.queue_bind(exchange=exchangename,queue='monitoring', routing_key='*.status')
     channel.basic_publish(exchange=exchangename, routing_key="machine.status",
                               body=message, properties=pika.BasicProperties(delivery_mode=2))
-
-    if status["errcodeid"] != 'none' or status["errcodeid"] != 0 or status["errcodeid"] != '0' :
-        # inform Error
-        channel.queue_declare(queue='errorhandler', durable=True)
-        channel.queue_bind(exchange=exchangename,
-                           queue='errorhandler', routing_key='*.error')
-        channel.basic_publish(exchange=exchangename, routing_key="machine.error",
-                              body=message, properties=pika.BasicProperties(delivery_mode=2))
+    if "code" in status:
+            
+        if status["errcodeid"] != 'none' or status["errcodeid"] != 0 or status["errcodeid"] != '0' :
+            # inform Error
+            channel.queue_declare(queue='errorhandler', durable=True)
+            channel.queue_bind(exchange=exchangename,
+                            queue='errorhandler', routing_key='*.error')
+            channel.basic_publish(exchange=exchangename, routing_key="machine.error",
+                                body=message, properties=pika.BasicProperties(delivery_mode=2))
     connection.close()
 
 
