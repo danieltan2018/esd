@@ -266,7 +266,7 @@ def newwash(user_id, queue_id, location, machine_id):
         params = {'location': location,
                   'machineid': machine_id, 'curuser': user_id}
         url = STATUSURL + 'updateMachineUser'
-        requests.post(url=url, params=params)
+        requests.put(url=url, params=params)
     except:
         send(id, "_Sorry, we are having trouble connecting to our Status system._", [])
         return
