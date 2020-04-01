@@ -226,16 +226,6 @@ def update_machine_User():
         result = {"code": code, "message": "Error Updating Data"}
 
     if code == 200:
-        if errcodeid == 0:
-            status.errcodeid = "none"
-        elif errcodeid == 1:
-            status.errcodeid = "Low on Detergent"
-        elif errcodeid == 2:
-            status.errcodeid = "Machine is Down"
-        elif errcodeid == 3:
-            status.errcodeid = "Water is Low"
-        else:
-            status.errcodeid = "Error Unknown Call Tier 3 Support"
         result = status.json()
     send_status(result)
     return str(result), code
