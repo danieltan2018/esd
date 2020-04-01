@@ -49,8 +49,10 @@ def sendMessage(order):
         data={"from": "DeLaundro <do_not_reply@delaundro.me>",
               "to": ["admin@delaundro.me"],
               "subject": "Machine Error",
-              "text": "Error: " . order . " observed, please fix asap",
+              "text": "Error:" + order + "observed, please fix asap",
               "o:tracking": False})
 
 
-receiveError()
+if __name__ == '__main__':
+    print("This is " + os.path.basename(__file__) + ": processing an order error...")
+    receiveError()
