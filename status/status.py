@@ -289,8 +289,8 @@ def send_status(status):
     exchangename = "laundro_topic"
     channel.exchange_declare(exchange=exchangename, exchange_type='topic')
     message = json.dumps(status, default=str)
-    channel.queue_declare(queue='monitoring', durable=True)
-    channel.queue_bind(exchange=exchangename,queue='monitoring', routing_key='*.status')
+    #channel.queue_declare(queue='monitoring', durable=True)
+    #channel.queue_bind(exchange=exchangename,queue='monitoring', routing_key='*.status')
     channel.basic_publish(exchange=exchangename, routing_key="machine.status",
                               body=message, properties=pika.BasicProperties(delivery_mode=2))
 
