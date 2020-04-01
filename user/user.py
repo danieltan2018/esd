@@ -298,7 +298,7 @@ def dopayment(update, context):
     id = query.message.chat_id
     try:
         params = {'user_id': id, 'queue_id': pendingusers[id]['queue'],
-                  'machine_id': pendingusers[id]['machine'], 'wash_type': washtype}
+                  'machine_id': pendingusers[id]['machine'], 'service_type': washtype}
         url = QUEUEURL + 'allocateMachine'
         requests.put(url=url, params=params)
     except:
