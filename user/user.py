@@ -52,8 +52,8 @@ exchangename = "laundro_topic"
 channel.exchange_declare(exchange=exchangename, exchange_type='topic')
 
 WASHTYPES = {"Standard Wash": 5, "Double Wash": 6, "Hot Wash": 7}
-STATUSURL = 'http://status.delaundro.me'
-QUEUEURL = 'http://queue.delaundro.me'
+STATUSURL = 'http://status.delaundro.me/'
+QUEUEURL = 'http://queue.delaundro.me/'
 pendingusers = {}
 
 
@@ -144,7 +144,7 @@ def welcome(update, context):
 @run_async
 def selectlocation(id, update, context):
     try:
-        url = STATUSURL + '/findLocation'
+        url = STATUSURL + 'findLocation'
         locations = requests.get(url).json()['Location']
     except:
         send(id, "_Sorry, we are having trouble connecting to our Status system._", [])
@@ -165,7 +165,7 @@ def selectqueue(update, context):
     data = data.replace('LOCATION=', '')
     try:
         params = {'location': data}
-        url = QUEUEURL + '/calculateWaitTime'
+        url = QUEUEURL + 'calculateWaitTime'
         waitingtime = requests.get(url=url, params=params).text
     except:
         context.bot.answer_callback_query(
