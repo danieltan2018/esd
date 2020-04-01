@@ -21,7 +21,7 @@ def receiveError():
     channelqueue = channel.queue_declare(queue="errorhandler", durable=True)
     queue_name = channelqueue.method.queue
     channel.queue_bind(exchange=exchangename,
-                       queue=queue_name, routing_key='machine.error')
+                       queue=queue_name, routing_key='*.error')
 
     # set up a consumer and start to wait for coming messages
     channel.basic_consume(
