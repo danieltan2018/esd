@@ -49,7 +49,7 @@ def sendMessage(order):
         data={"from": "DeLaundro <do_not_reply@delaundro.me>",
               "to": ["admin@delaundro.me"],
               "subject": "Machine Error",
-              "text": "Error:" + order + "observed, please fix asap",
+              "text":  order ,
               "o:tracking": False})
 
 
