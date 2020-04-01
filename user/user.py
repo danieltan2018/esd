@@ -8,12 +8,12 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler,
 from telegram.ext.dispatcher import run_async
 import pika
 import json
-'''
+
 import logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-'''
+
 BOTTOKEN = os.getenv('BOTTOKEN')
 PORT = 88
 bot = telegram.Bot(token=BOTTOKEN)
@@ -101,6 +101,7 @@ def paymentamqp(message):
                        queue='monitoring', routing_key='#')
     channel.basic_publish(exchange=exchangename, routing_key="payment.info",
                           body=message, properties=pika.BasicProperties(delivery_mode=2))
+    return
 
 
 @run_async
@@ -134,6 +135,7 @@ def callbackquery(update, context):
         cancelqueue(update, context)
     elif data.startswith('WASHTYPE='):
         dopayment(update, context)
+    return
 
 
 @run_async
@@ -219,8 +221,6 @@ def joinqueue(update, context):
         params = {'location': data, 'user_id': chat_id}
         url = QUEUEURL + 'newqueue'
         requests.post(url=url, params=params)
-        context.bot.answer_callback_query(
-            query.id, text="There is no queue. You will be assigned the first available machine.", show_alert=True)
         if queue:
             params = {'location': data}
             url = QUEUEURL + 'queuelist'
@@ -232,6 +232,8 @@ def joinqueue(update, context):
             context.bot.answer_callback_query(
                 query.id, text="There are {} people ahead of you. We will notify you when it's your turn.".format(queuelength), show_alert=True)
         else:
+            context.bot.answer_callback_query(
+                query.id, text="There is no queue. You will be assigned the first available machine.", show_alert=True)
             params = {'location': data}
             url = QUEUEURL + 'nextuser'
             nextuser = requests.get(url=url, params=params)
@@ -270,7 +272,7 @@ def newwash(user_id, queue_id, location, machine_id):
         url = STATUSURL + 'updateMachineUser'
         requests.put(url=url, params=params)
     except:
-        send(id, "_Sorry, we are having trouble connecting to our Status system._", [])
+        send(user_id, "_Sorry, we are having trouble connecting to our Status system._", [])
         return
     global pendingusers
     pendingusers[user_id] = {'queue': queue_id,
@@ -280,7 +282,7 @@ def newwash(user_id, queue_id, location, machine_id):
     for washtype in WASHTYPES:
         keyboard.append([InlineKeyboardButton(
             washtype, callback_data='WASHTYPE={}'.format(washtype))])
-    send(id, msg, keyboard)
+    send(user_id, msg, keyboard)
     return
 
 
@@ -295,7 +297,7 @@ def dopayment(update, context):
         params = {'user_id': id, 'queue_id': pendingusers[id]['queue'],
                   'machine_id': machine_id, 'wash_type': washtype}
         url = QUEUEURL + 'allocateMachine'
-        requests.post(url=url, params=params)
+        requests.put(url=url, params=params)
     except:
         send(id, "_Sorry, we are having trouble connecting to our Queue system._", [])
         return
@@ -362,6 +364,7 @@ def main():
     dp.add_handler(PreCheckoutQueryHandler(precheckout))
     dp.add_handler(MessageHandler(Filters.successful_payment, paymentsuccess))
 
+    updater.start_polling()  # DEBUG ONLY
     startamqp()
     updater.start_webhook(listen='0.0.0.0',
                           port=PORT,
