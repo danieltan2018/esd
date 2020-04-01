@@ -149,7 +149,7 @@ def alloc_Machine():
     return result
 
 
-# Return wash type, duration, cost
+# Return  duration, cost
 # Dequeue
 @app.route("/serviceDequeue")
 def service_details():
@@ -158,14 +158,6 @@ def service_details():
     cost = 0
     laundqueue = LaundQueue.query.filter_by(
         user_id=user_id, location=location).first()
-    wash_type = laundqueue.json()["service_type"]
-    if wash_type == "standard wash":
-        cost = 5
-    elif wash_type == "double wash":
-        cost = 6
-    elif wash_type == "hot wash":
-        cost = 7
-
     if laundqueue:
         db.session.delete(laundqueue)
         db.session.commit()
