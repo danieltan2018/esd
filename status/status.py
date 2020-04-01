@@ -225,6 +225,16 @@ def update_machine_User():
         result = {"code": code, "message": "Error Updating Data"}
 
     if code == 200:
+        if errcodeid == 0:
+            status.errcodeid = "none"
+        elif errcodeid == 1:
+            status.errcodeid = "Low on Detergent"
+        elif errcodeid == 2:
+            status.errcodeid = "Machine is Down"
+        elif errcodeid == 3:
+            status.errcodeid = "Water is Low"
+        else:
+            status.errcodeid = "Error Unknown Call Tier 3 Support"
         result = status.json()
     send_status(result)
     return str(result), code
@@ -254,7 +264,7 @@ def create_machine():
     return str(result), code
 
 
-@app.route("/updateMachineToInUse", methods=['PUT'])
+@app.route("/updateMachineStatus", methods=['PUT'])
 def update_machine_In_Use():
     machineid = request.args.get('machineid')
     location = request.args.get('location')
@@ -264,7 +274,7 @@ def update_machine_In_Use():
         status = Status.query.filter_by(
             machineid=machineid, location=location).first()
 
-        status.statuscodeid = 1
+        status.statuscodeid = request.json["statuscodeid"]
 
     else:
         code = 400
