@@ -91,6 +91,7 @@ def amqpcallback(channel, method, properties, body):
         nextuser = requests.get(url=url, params=params)
         if nextuser.status_code == 200:
             newuser = nextuser.json()
+            send(newuser['user_id'], "It's your turn!", [])
             newwash(newuser['user_id'], newuser['queue_id'],
                     location, machine_id)
         return
