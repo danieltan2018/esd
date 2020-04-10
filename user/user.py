@@ -100,9 +100,6 @@ def amqpcallback(channel, method, properties, body):
 @run_async
 def paymentamqp(message):
     message = json.dumps(message, default=str)
-    channel.queue_declare(queue='monitoring', durable=True)
-    channel.queue_bind(exchange=exchangename,
-                       queue='monitoring', routing_key='#')
     channel.basic_publish(exchange=exchangename, routing_key="payment.info",
                           body=message, properties=pika.BasicProperties(delivery_mode=2))
     return

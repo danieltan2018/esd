@@ -16,14 +16,10 @@ channel.exchange_declare(exchange=exchangename, exchange_type='topic')
 
 
 def receiveError():
-    # prepare a queue for receiving messages
-    # 'durable' makes the queue survive broker restarts
-    channelqueue = channel.queue_declare(queue="", durable=True)
+    channelqueue = channel.queue_declare(queue="errorhandler", durable=True)
     queue_name = channelqueue.method.queue
     channel.queue_bind(exchange=exchangename,
                        queue=queue_name, routing_key='*.error')
-
-    # set up a consumer and start to wait for coming messages
     channel.basic_consume(
         queue=queue_name, on_message_callback=callback, auto_ack=True)
     channel.start_consuming()
@@ -43,7 +39,8 @@ def processError(order):
 
 
 def sendMessage(order):
-    message = "Machine:"+str(order['machineid'])+ " at " + str(order['location']) +  " having this error " + str(order['errcodeid'])
+    message = "Machine:"+str(order['machineid']) + " at " + str(
+        order['location']) + " having this error " + str(order['errcodeid'])
     print(message)
     return requests.post(
         "https://api.mailgun.net/v3/delaundro.me/messages",
@@ -51,11 +48,11 @@ def sendMessage(order):
         data={"from": "DeLaundro <do_not_reply@delaundro.me>",
               "to": ["admin@delaundro.me"],
               "subject": "Machine Error",
-              "text":  message ,
+              "text":  message,
               "o:tracking": False})
-    
 
 
 if __name__ == '__main__':
-    print("This is " + os.path.basename(__file__) + ": processing an order error...")
+    print("This is " + os.path.basename(__file__) +
+          ": processing an order error...")
     receiveError()
