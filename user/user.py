@@ -226,10 +226,7 @@ def joinqueue(update, context):
             params = {'location': data}
             url = QUEUEURL + 'queuelist'
             queuelist = requests.get(url=url, params=params)
-            if queuelist.status_code == 200:
-                queuelength = len(queuelist.json()['queue'])
-            else:
-                queuelength = 0
+            queuelength = len(queuelist.json()['queue']) - 1
             context.bot.answer_callback_query(
                 query.id, text="There are {} people ahead of you. We will notify you when it's your turn.".format(queuelength), show_alert=True)
         else:
