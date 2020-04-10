@@ -27,21 +27,17 @@ def receiveError():
 
 # required signature for the callback; no return
 def callback(channel, method, properties, body):
-    print("Received an error by " + __file__)
-    processError(json.loads(body))
     sendMessage(json.loads(body))
-    print()
-
-
-def processError(order):
-    print("Recording an error:")
-    print(order)
 
 
 def sendMessage(order):
-    message = "Machine:"+str(order['machineid']) + " at " + str(
-        order['location']) + " having this error " + str(order['errcodeid'])
-    print(message)
+    if order['errcodeid']:
+        message = "Machine "+str(order['machineid']) + " at " + str(
+            order['location']) + " is having this error: " + str(order['errcodeid'])
+    else:
+        message = "Machine " + \
+            str(order['machineid']) + " at " + \
+            str(order['location']) + " error resolved."
     return requests.post(
         "https://api.mailgun.net/v3/delaundro.me/messages",
         auth=("api", MAILGUNKEY),
@@ -53,6 +49,4 @@ def sendMessage(order):
 
 
 if __name__ == '__main__':
-    print("This is " + os.path.basename(__file__) +
-          ": processing an order error...")
     receiveError()
