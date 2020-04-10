@@ -334,9 +334,11 @@ def precheckout(update, context):
 @run_async
 def paymentsuccess(update, context):
     user_id = update.message.chat_id
-    paymentdetails = {"payment": user_id}
-    paymentamqp(paymentdetails)
     machine_id = pendingusers[user_id]['machine']
+    location = pendingusers[user_id]['location']
+    paymentdetails = {'location': location,
+                      'machineid': machine_id, 'payment': user_id}
+    paymentamqp(paymentdetails)
     send(user_id, "Thank you for your payment! Please proceed to *Machine {}*.".format(machine_id), [])
     sendqr(update, context)
     return
