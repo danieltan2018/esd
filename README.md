@@ -1,8 +1,7 @@
 # DE’LAUNDRO PROJECT README
 
-Pre-requisites: Docker, Docker Compose (required libraries will be installed by docker)
-
 ## How to run microservices:
+### Pre-requisites: Docker, Docker Compose (required libraries will be installed by docker)
 1. Start RabbitMQ server (Docker image) using “docker run -d --hostname my-rabbit --name some-rabbit rabbitmq:3”
 2. Navigate into the respective folder for each microservice:
    * user
@@ -18,7 +17,7 @@ Pre-requisites: Docker, Docker Compose (required libraries will be installed by 
    * Note: queue, status, monitoring and vendor cannot be run on the same machine as they all bind to external port 80
 
 ## How to use the Smart Washing Machine Simulator (script.py):
-This script simulates individual smart washing machines sending HTTP requests to the Status microservice.
+### This script simulates individual smart washing machines sending HTTP requests to the Status microservice.
 
 When running the script you will be prompted with a question “What do you want me to do?”. 
 
