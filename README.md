@@ -1,7 +1,7 @@
 # esd
 G4T4's Enterprise Solution Development Project
-DE’LAUNDRO PROJECT 
-README
+
+DE’LAUNDRO PROJECT README
 Pre-requisites: Python, Docker, Docker Compose, RabbitMQ, WAMP Server, HTML 
 Import libraries: Json, sys, os, pika, requests, telegram, Javascript, CORS, Flask, jsonify, SQL Alchemy, uuid
 API: Mailgun API, Qr Server API, Stripe API, Google API
@@ -44,3 +44,8 @@ You will have to use a QR code scanner to be able to input the QR code for this 
 
 -“turn off one machine”
 This will allow you to manipulate the backend database, as it was shown in the demonstration, to set one machine in your database to “available”.
+
+
+All Docker Compose documents can be accessed via command prompt at:
+ssh root@<URL>
+Password: delaundro.me
