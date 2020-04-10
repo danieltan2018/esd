@@ -26,12 +26,11 @@ CORS(app)
 class Monitoring(db.Model):
     tablename = 'monitoring'
 
-    m_id = db.Column(db.Integer, primary_key=True,
-                     autoincrement=True)  # primary key finder
-    machineid = db.Column(db.Integer, primary_key=True)
-    location = db.Column(db.String(100), primary_key=True)
-    statuscodeid = db.Column(db.Integer, nullable=False)
-    errcodeid = db.Column(db.String(100), nullable=False)
+    m_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    machineid = db.Column(db.Integer, nullable=False)
+    location = db.Column(db.String(100), nullable=False)
+    statuscodeid = db.Column(db.Integer, nullable=True)
+    errcodeid = db.Column(db.String(100), nullable=True)
     payment = db.Column(db.Integer, nullable=True)
     date_time = db.Column(db.String(100), nullable=True)
 
@@ -70,8 +69,10 @@ def receiveOrderLog():
     channel.exchange_declare(exchange=exchangename, exchange_type='topic')
     channelqueue = channel.queue_declare(queue='', durable=True)
     queue_name = channelqueue.method.queue
-    channel.queue_bind(exchange=exchangename,queue=queue_name, routing_key='*.status')
-    channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
+    channel.queue_bind(exchange=exchangename,
+                       queue=queue_name, routing_key='#')
+    channel.basic_consume(
+        queue=queue_name, on_message_callback=callback, auto_ack=True)
     channel.start_consuming()
 
 
@@ -91,7 +92,6 @@ def insert_log(order):
     monitoring = Monitoring(**data)
     db.session.add(monitoring)
     db.session.commit()
-
 
 
 if __name__ == '__main__':
