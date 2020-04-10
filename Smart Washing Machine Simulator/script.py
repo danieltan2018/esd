@@ -61,7 +61,7 @@ if user_command == "use machine":
     if unlockcode == qrcode:
         print("Door open")
 
-    if startcode == qrcode:
+    elif startcode == qrcode:
 
         # Change status of machine to in use 
         change_status_url = "http://status.delaundro.me/updateMachineStatus?machineid=" + machine_id + "&location=" + location        
@@ -93,6 +93,9 @@ if user_command == "use machine":
         washtype = washtype_object["wash type"]
 
         print("Your machine has started. Your wash type is: " + washtype)
+    
+    else:
+        print("Invalid QR code")
 
 
 #Functionality 5: Turn off one machine 
@@ -110,4 +113,5 @@ if user_command == "turn off one machine":
     # print(change_status_url)
     # print(x.text)
 
-
+else:
+    print("Invalid command. Please try again")
